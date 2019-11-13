@@ -40,6 +40,8 @@ public:
 
 //[0][0] 은 조커
 Card cards[4][14];
+int colorCnt[4];
+int numberCnt[14];
 
 bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard);
 bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int remainCard);
@@ -72,6 +74,7 @@ bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int re
 		}
 
 		grp.pop_back();
+		//cout << "makeSameNum false" << endl;
 		return false;
 	}
 
@@ -110,6 +113,7 @@ bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int re
 		}
 	}
 
+	//cout << "makeSameNum false" << endl;
 	return false;
 }
 //연속된 숫자, 같은색
@@ -137,6 +141,7 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 		}
 
 		grp.pop_back();
+		//cout << "makeDiffNum false" << endl;
 		return false;
 	}
 	//같은숫자, 없는 색의 카드를 찾는다.
@@ -144,8 +149,10 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 	int cardColor = card.back().color_;
 	int nextNumber = cardNumber + 1;
 
-	if (cardNumber == 13)
+	if (cardNumber == 13) {
+		//cout << "makeDiffNum false" << endl;
 		return false;
+	}
 
 	//조커를 찾는다면 숫자와 색을 정해줌
 	if (cards[0][0].count_ > 0) {
@@ -166,8 +173,24 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 		card.pop_back();
 		cards[cardColor][nextNumber].addCard();
 	}
+	//cout << "makeDiffNum false" << endl;
 	return false;
 
+}
+
+int getNumberCount(int number) {
+	int sum = 0;
+	for (int i = 0; i < 4; i++) {
+		sum += cards[i][number].count_;
+	}
+	return sum;
+}
+int getColorCount(int color) {
+	int sum = 0;
+	for (int i = 0; i < 14; i++) {
+		sum += cards[color][i].count_;
+	}
+	return sum;
 }
 
 //color, number 카드로 시작해서 remainCard로 조합해서 답을 낼 수 있는가
@@ -179,6 +202,8 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 	remainCard--;
 
 	//조커인 경우
+	//조커인 경우 모든 카드로 시도하지않고 후보들을 추린다면 시간복잡도가 줄것..
+	//후보들을 어떻게 추릴까
 	if (number == 0) {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 1; j < 14; j++) {
@@ -186,6 +211,8 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 				int currNumber = j;
 				//같은숫자, 다른색 조합시도
 				for (int gSize = 3; gSize < 5; gSize++) {
+					if (numberCnt[currNumber] < gSize - 1)
+						break;
 					vector<CardGroup> origGroups = groups;
 					vector<Card> card;
 					Card currCard(currNumber, currColor, true);
@@ -196,6 +223,8 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 				}
 				//다른숫자, 같은색 조합시도 (min : 3 , max : 13개)
 				for (int nSize = 3; nSize < 14; nSize++) {
+					if (colorCnt[currColor] < nSize - 1)
+						break;
 					vector<CardGroup> origGroups = groups;
 					vector<Card> card;
 					Card currCard(currNumber, currColor, true);
@@ -231,6 +260,7 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 
 	cards[color][number].addCard();
 	remainCard++;
+	//cout << "isMake false" << endl;
 	return false;
 }
 
@@ -238,23 +268,30 @@ void printResult(const vector<CardGroup>& groups) {
 	for (int i = 0; i < groups.size(); i++) {
 		for (int j = 0; j < groups[i].cards.size(); j++) {
 			if (groups[i].cards[j].joker_) {
-				cout << "joker /";
+				cout << "(joker) /";
 				continue;
 			}
 			if (groups[i].cards[j].color_ == RED)
-				cout << "(num: " << groups[i].cards[j].number_ << ", color: RED) ";
+				cout << "(num: " << groups[i].cards[j].number_ << ", color: RED) /";
 			else if (groups[i].cards[j].color_ == YELLOW)
-				cout << "(num: " << groups[i].cards[j].number_ << ", color: YELLOW) ";
+				cout << "(num: " << groups[i].cards[j].number_ << ", color: YELLOW) /";
 			else if (groups[i].cards[j].color_ == BLUE)
-				cout << "(num: " << groups[i].cards[j].number_ << ", color: BLUE) ";
+				cout << "(num: " << groups[i].cards[j].number_ << ", color: BLUE) /";
 			else if (groups[i].cards[j].color_ == BLACK)
-				cout << "(num: " << groups[i].cards[j].number_ << ", color: BLACK) ";
+				cout << "(num: " << groups[i].cards[j].number_ << ", color: BLACK) /";
 		}
 		cout << endl;
 	}
 }
 void printFail() {
 	cout << "impossible" << endl;
+}
+
+void init() {
+	for (int i = 0; i < 4; i++)
+		colorCnt[i] = 0;
+	for (int i = 0; i < 14; i++)
+		numberCnt[i] = 0;
 }
 
 void solve() {
@@ -277,6 +314,7 @@ void solve() {
 int main() {
 	scanf("%d", &T);
 	for (int tc = 1; tc <= T; tc++) {
+		init();
 		scanf("%d", &N);
 		for (int i = 0; i < N; i++) {
 			//input card info
@@ -293,6 +331,8 @@ int main() {
 			cards[color][number].number_ = number;
 			cards[color][number].color_ = color;
 			cards[color][number].addCard();
+			numberCnt[number]++;
+			colorCnt[color]++;
 		}
 		printf("#%d\n", tc);
 		solve();
