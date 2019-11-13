@@ -152,7 +152,7 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 		cards[0][0].subCard();
 		Card addCard(nextNumber, cardColor, true);
 		card.push_back(addCard);
-		if (makeSameNum(numSize, card, grp, remainCard - 1))
+		if (makeDiffNum(numSize, card, grp, remainCard - 1))
 			return true;
 		card.pop_back();
 		cards[0][0].addCard();
@@ -161,7 +161,7 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 		cards[cardColor][nextNumber].subCard();
 		Card addCard(nextNumber, cardColor, false);
 		card.push_back(addCard);
-		if (makeSameNum(numSize, card, grp, remainCard - 1))
+		if (makeDiffNum(numSize, card, grp, remainCard - 1))
 			return true;
 		card.pop_back();
 		cards[cardColor][nextNumber].addCard();
