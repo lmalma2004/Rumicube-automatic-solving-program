@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <map>
 
 #define RED         0
 #define YELLOW      1
@@ -47,11 +48,9 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard);
 bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int remainCard);
 bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int remainCard);
 
-
 //색들이필요
 //vector<CardGroup> 는 vector<vector<Card>>와 같은의미
 bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int remainCard) {
-
 	if (card.size() == grpSize) {
 		CardGroup newGrp;
 		newGrp.cards = card;
@@ -59,23 +58,22 @@ bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int re
 
 		if (remainCard == 0)
 			return true;
+		if (remainCard < 3)
+			return false;
 
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 14; j++) {
 				//color : i / number : j 인 카드로 조합을 해본다.
 				if (cards[i][j].count_ != 0) {
-					//vector<CardGroup> groups;
-					if (isMake(i, j, grp, remainCard)) {
-						//printResult(grp);
+					if (isMake(i, j, grp, remainCard))
 						return true;
+					else {
+						grp.pop_back();
+						return false;
 					}
 				}
 			}
 		}
-
-		grp.pop_back();
-		//cout << "makeSameNum false" << endl;
-		return false;
 	}
 
 	for (int i = 0; i < 4; i++) {
@@ -101,7 +99,7 @@ bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int re
 				card.pop_back();
 				cards[0][0].addCard();
 			}
-			else if (cards[cardColor][cardNumber].count_ > 0) {
+			if (cards[cardColor][cardNumber].count_ > 0) {
 				cards[cardColor][cardNumber].subCard();
 				Card addCard(cardNumber, cardColor, false);
 				card.push_back(addCard);
@@ -112,12 +110,11 @@ bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int re
 			}
 		}
 	}
-
-	//cout << "makeSameNum false" << endl;
 	return false;
 }
 //연속된 숫자, 같은색
 bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int remainCard) {
+
 	//조합을 마친경우
 	if (card.size() == numSize) {
 		CardGroup newGrp;
@@ -126,33 +123,30 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 
 		if (remainCard == 0)
 			return true;
+		if (remainCard < 3)
+			return false;
 
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 14; j++) {
 				//color : i / number : j 인 카드로 조합을 해본다.
 				if (cards[i][j].count_ != 0) {
-					//vector<CardGroup> groups;
-					if (isMake(i, j, grp, remainCard)) {
-						//printResult(grp);
+					if (isMake(i, j, grp, remainCard))
 						return true;
+					else {
+						grp.pop_back();
+						return false;
 					}
 				}
 			}
 		}
-
-		grp.pop_back();
-		//cout << "makeDiffNum false" << endl;
-		return false;
 	}
 	//같은숫자, 없는 색의 카드를 찾는다.
 	int cardNumber = card.back().number_;
 	int cardColor = card.back().color_;
 	int nextNumber = cardNumber + 1;
 
-	if (cardNumber == 13) {
-		//cout << "makeDiffNum false" << endl;
+	if (cardNumber == 13)
 		return false;
-	}
 
 	//조커를 찾는다면 숫자와 색을 정해줌
 	if (cards[0][0].count_ > 0) {
@@ -164,7 +158,7 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 		card.pop_back();
 		cards[0][0].addCard();
 	}
-	else if (cards[cardColor][nextNumber].count_ > 0) {
+	if (cards[cardColor][nextNumber].count_ > 0) {
 		cards[cardColor][nextNumber].subCard();
 		Card addCard(nextNumber, cardColor, false);
 		card.push_back(addCard);
@@ -173,24 +167,7 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 		card.pop_back();
 		cards[cardColor][nextNumber].addCard();
 	}
-	//cout << "makeDiffNum false" << endl;
 	return false;
-
-}
-
-int getNumberCount(int number) {
-	int sum = 0;
-	for (int i = 0; i < 4; i++) {
-		sum += cards[i][number].count_;
-	}
-	return sum;
-}
-int getColorCount(int color) {
-	int sum = 0;
-	for (int i = 0; i < 14; i++) {
-		sum += cards[color][i].count_;
-	}
-	return sum;
 }
 
 //color, number 카드로 시작해서 remainCard로 조합해서 답을 낼 수 있는가
@@ -238,6 +215,8 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 	}
 	else {
 		for (int gSize = 3; gSize < 5; gSize++) {
+			if (numberCnt[number] + cards[0][0].count_ < gSize)
+				break;
 			vector<CardGroup> origGroups = groups;
 			vector<Card> card;
 			Card currCard(number, color, false);
@@ -248,6 +227,8 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 		}
 		//다른숫자, 같은색 조합시도 (min : 3 , max : 13개)
 		for (int nSize = 3; nSize < 14; nSize++) {
+			if (colorCnt[color] + cards[0][0].count_ < nSize)
+				break;
 			vector<CardGroup> origGroups = groups;
 			vector<Card> card;
 			Card currCard(number, color, false);
@@ -260,7 +241,6 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 
 	cards[color][number].addCard();
 	remainCard++;
-	//cout << "isMake false" << endl;
 	return false;
 }
 
