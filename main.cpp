@@ -43,6 +43,7 @@ public:
 Card cards[4][14];
 int colorCnt[4];
 int numberCnt[14];
+int jokerCnt;
 
 bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard);
 bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int remainCard);
@@ -65,6 +66,8 @@ bool makeSameNum(int grpSize, vector<Card>& card, vector<CardGroup>& grp, int re
 			for (int j = 0; j < 14; j++) {
 				//color : i / number : j 인 카드로 조합을 해본다.
 				if (cards[i][j].count_ != 0) {
+					//solve()단계에서 i,j로 시작해서 만드는 모든 그룹을 시도하기 때문에 
+					//실패하면 바로 리턴한다.
 					if (isMake(i, j, grp, remainCard))
 						return true;
 					else {
@@ -130,6 +133,8 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 			for (int j = 0; j < 14; j++) {
 				//color : i / number : j 인 카드로 조합을 해본다.
 				if (cards[i][j].count_ != 0) {
+					//solve()단계에서 i,j로 시작해서 만드는 모든 그룹을 시도하기 때문에 
+					//실패하면 바로 리턴한다.
 					if (isMake(i, j, grp, remainCard))
 						return true;
 					else {
@@ -140,15 +145,16 @@ bool makeDiffNum(int numSize, vector<Card>& card, vector<CardGroup>& grp, int re
 			}
 		}
 	}
-	//같은숫자, 없는 색의 카드를 찾는다.
+
+	//다른숫자, 같은 색의 카드를 찾는다.
 	int cardNumber = card.back().number_;
 	int cardColor = card.back().color_;
 	int nextNumber = cardNumber + 1;
 
-	if (cardNumber == 13)
+	if (nextNumber == 14)
 		return false;
 
-	//조커를 찾는다면 숫자와 색을 정해줌
+	//조커를 찾는다면 숫자와 색을 nextNumber와 cardColor로 정해준다.
 	if (cards[0][0].count_ > 0) {
 		cards[0][0].subCard();
 		Card addCard(nextNumber, cardColor, true);
@@ -188,7 +194,9 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 				int currNumber = j;
 				//같은숫자, 다른색 조합시도
 				for (int gSize = 3; gSize < 5; gSize++) {
-					if (numberCnt[currNumber] < gSize - 1)
+					//gSize - jokerCnt 인 이유 : 현재여긴 조커인 경우의 구문, 조커 포함그룹은 gSize보다 1만큼 작은 숫자들을 가지고 있어도 됨
+					//예시: 그룹이 joker / 1 blue / 1 red 라면 gSize는 3이지만 1의 개수는 2개로 조합이 가능하다.
+					if (numberCnt[currNumber] < gSize - jokerCnt)
 						break;
 					vector<CardGroup> origGroups = groups;
 					vector<Card> card;
@@ -200,7 +208,8 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 				}
 				//다른숫자, 같은색 조합시도 (min : 3 , max : 13개)
 				for (int nSize = 3; nSize < 14; nSize++) {
-					if (colorCnt[currColor] < nSize - 1)
+					//nSize - 1 인 이유 : gSize의 설명과 같음.
+					if (colorCnt[currColor] < nSize - jokerCnt)
 						break;
 					vector<CardGroup> origGroups = groups;
 					vector<Card> card;
@@ -215,7 +224,7 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 	}
 	else {
 		for (int gSize = 3; gSize < 5; gSize++) {
-			if (numberCnt[number] + cards[0][0].count_ < gSize)
+			if (numberCnt[number] + jokerCnt < gSize)
 				break;
 			vector<CardGroup> origGroups = groups;
 			vector<Card> card;
@@ -227,7 +236,7 @@ bool isMake(int color, int number, vector<CardGroup>& groups, int remainCard) {
 		}
 		//다른숫자, 같은색 조합시도 (min : 3 , max : 13개)
 		for (int nSize = 3; nSize < 14; nSize++) {
-			if (colorCnt[color] + cards[0][0].count_ < nSize)
+			if (colorCnt[color] + jokerCnt < nSize)
 				break;
 			vector<CardGroup> origGroups = groups;
 			vector<Card> card;
@@ -272,6 +281,7 @@ void init() {
 		colorCnt[i] = 0;
 	for (int i = 0; i < 14; i++)
 		numberCnt[i] = 0;
+	jokerCnt = 0;
 }
 
 void solve() {
@@ -305,6 +315,7 @@ int main() {
 			if (number == 0) {
 				cards[0][0].joker_ = true;
 				cards[0][0].addCard();
+				jokerCnt++;
 				continue;
 			}
 			scanf("%d", &color);
