@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">RummikubSolve</string>
+    <string name="Card_Add">Card Add</string>
+    <string name="Current_Cards">Current Cards</string>
+    <string name="State">State:</string>
+    <string name="Result">Result</string>
+</resources>
