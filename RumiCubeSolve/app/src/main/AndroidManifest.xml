@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.rummikubsolve.engine">
+    package="com.rummysolver.engine">
 
     <application
         android:allowBackup="true"
@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
         <activity
-            android:name="com.rummikubsolve.engine.LoadingActivity"
+            android:name="com.rummysolver.engine.LoadingActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -21,13 +21,13 @@
         </activity>
 
         <activity
-            android:name="com.rummikubsolve.engine.MainActivity"
+            android:name="com.rummysolver.engine.MainActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="landscape">
         </activity>
 
         <activity
-            android:name="com.rummikubsolve.engine.ResultActivity"
+            android:name="com.rummysolver.engine.ResultActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="landscape">
         </activity>

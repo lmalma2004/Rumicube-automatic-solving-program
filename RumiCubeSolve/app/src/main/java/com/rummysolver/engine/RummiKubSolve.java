@@ -1,4 +1,4 @@
-package com.rummikubsolve.engine;
+package com.rummysolver.engine;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -119,9 +119,15 @@ public class RummiKubSolve {
     public RummiKubSolve() {
         init();
     }
+
+    //boolean isPossible(){
+
+    //}
     boolean isMake(int color, int number, ArrayList<CardGroup> groups, int remainCard){
         if (remainCard == 0)
             return true;
+        //if(!isPossible())
+        //    return false;
         cards[color][number].subCard();
         remainCard--;
         //조커인 경우

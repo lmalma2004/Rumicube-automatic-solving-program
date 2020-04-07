@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@drawable/background2"
+    android:background="@drawable/background3"
     tools:context=".MainActivity">
 
     <TableLayout
@@ -191,7 +191,7 @@
             <ImageButton
                 android:id="@+id/cardJ"
                 android:layout_weight="1"
-                android:src="@drawable/joker_black"
+                android:src="@drawable/joker_black2"
                 android:maxHeight="70dp"
                 android:padding="0sp"
                 android:scaleType="fitXY"

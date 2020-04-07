@@ -1,4 +1,4 @@
-package com.rummikubsolve.engine;
+package com.rummysolver.engine;
 
 import org.junit.Test;
 

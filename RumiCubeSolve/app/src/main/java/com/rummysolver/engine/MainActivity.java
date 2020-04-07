@@ -1,4 +1,4 @@
-package com.rummikubsolve.engine;
+package com.rummysolver.engine;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -90,17 +90,17 @@ public class MainActivity extends AppCompatActivity{
         lineManagerOfMainActivity.myCardLine[1].line = (TableRow)findViewById(R.id.MyCardRow2);
     }
     protected void createButtons(){
-        cards = new ImageButton[14];
-        cards[0] = (ImageButton)findViewById(R.id.cardJ);
-        cards[1] = (ImageButton)findViewById(R.id.card1);
-        cards[2] = (ImageButton)findViewById(R.id.card2);
-        cards[3] = (ImageButton)findViewById(R.id.card3);
-        cards[4] = (ImageButton)findViewById(R.id.card4);
-        cards[5] = (ImageButton)findViewById(R.id.card5);
-        cards[6] = (ImageButton)findViewById(R.id.card6);
-        cards[7] = (ImageButton)findViewById(R.id.card7);
-        cards[8] = (ImageButton)findViewById(R.id.card8);
-        cards[9] = (ImageButton)findViewById(R.id.card9);
+        cards     =  new ImageButton[14];
+        cards[0]  = (ImageButton)findViewById(R.id.cardJ);
+        cards[1]  = (ImageButton)findViewById(R.id.card1);
+        cards[2]  = (ImageButton)findViewById(R.id.card2);
+        cards[3]  = (ImageButton)findViewById(R.id.card3);
+        cards[4]  = (ImageButton)findViewById(R.id.card4);
+        cards[5]  = (ImageButton)findViewById(R.id.card5);
+        cards[6]  = (ImageButton)findViewById(R.id.card6);
+        cards[7]  = (ImageButton)findViewById(R.id.card7);
+        cards[8]  = (ImageButton)findViewById(R.id.card8);
+        cards[9]  = (ImageButton)findViewById(R.id.card9);
         cards[10] = (ImageButton)findViewById(R.id.card10);
         cards[11] = (ImageButton)findViewById(R.id.card11);
         cards[12] = (ImageButton)findViewById(R.id.card12);

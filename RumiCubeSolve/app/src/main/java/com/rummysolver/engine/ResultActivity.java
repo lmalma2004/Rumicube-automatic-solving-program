@@ -1,4 +1,4 @@
-package com.rummikubsolve.engine;
+package com.rummysolver.engine;
 
 import android.animation.Animator;
 import android.content.Intent;
@@ -13,11 +13,12 @@ import com.airbnb.lottie.LottieAnimationView;
 import java.util.ArrayList;
 
 public class ResultActivity extends AppCompatActivity {
-    private LinearLayout allOfResultCardsOfParent;
-    private TableLayout allOfResultCards;
+    private LinearLayout        allOfResultCardsOfParent;
+    private TableLayout         allOfResultCards;
     private LottieAnimationView animationOfResult;
+
     private ArrayList<RummiKubSolve.CardGroup> result;
-    public LineManagerOfResultActivity lineManagerOfResultActivity = new LineManagerOfResultActivity();
+    private LineManagerOfResultActivity lineManagerOfResultActivity = new LineManagerOfResultActivity();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +28,9 @@ public class ResultActivity extends AppCompatActivity {
         allOfResultCardsOfParent = (LinearLayout)findViewById(R.id.ResultCardLayoutOfParent);
 
         animationOfResult = new LottieAnimationView(this);
-        animationOfResult.setLayoutParams(new LinearLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT));
+        animationOfResult.setLayoutParams(new LinearLayout.LayoutParams(
+                TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.MATCH_PARENT));
         animationOfResult.setAnimation("correct.json");
 
         allOfResultCardsOfParent.addView(animationOfResult);
@@ -40,6 +43,7 @@ public class ResultActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                //애니메이션 뷰를 지워줘야 정답 뷰 가 보임
                 allOfResultCardsOfParent.removeView(animationOfResult);
             }
 
@@ -55,7 +59,9 @@ public class ResultActivity extends AppCompatActivity {
         });
 
         allOfResultCards = new TableLayout(this);
-        allOfResultCards.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.MATCH_PARENT));
+        allOfResultCards.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.WRAP_CONTENT,
+                TableLayout.LayoutParams.MATCH_PARENT));
 
         allOfResultCardsOfParent.addView(allOfResultCards);
 

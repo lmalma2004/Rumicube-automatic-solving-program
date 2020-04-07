@@ -1,4 +1,4 @@
-package com.rummikubsolve.engine;
+package com.rummysolver.engine;
 
 import android.content.Context;
 import android.view.View;
@@ -75,7 +75,7 @@ public class LineManagerOfMainActivity {
         button.setAdjustViewBounds(true);
 
         if(number == 0){
-            button.setImageResource(R.drawable.joker_black);
+            button.setImageResource(R.drawable.joker_black2);
         }
         else if(number == 1){
             if(color == RED)

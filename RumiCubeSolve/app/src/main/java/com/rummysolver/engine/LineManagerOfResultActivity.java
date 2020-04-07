@@ -1,4 +1,4 @@
-package com.rummikubsolve.engine;
+package com.rummysolver.engine;
 
 import android.content.Context;
 import android.widget.ImageButton;
@@ -72,7 +72,7 @@ public class LineManagerOfResultActivity {
         button.setAdjustViewBounds(true);
 
         if(number == 0){
-            button.setImageResource(R.drawable.joker_black);
+            button.setImageResource(R.drawable.joker_black2);
         }
         else if(number == 1){
             if(color == RED)
@@ -238,6 +238,9 @@ public class LineManagerOfResultActivity {
             }
             else{
                 currLine.addGroup(cardGroup, context);
+                //groupNumber가 horiLineMaxGroupNumber 이하일때 가중치를 주면 그룹카드들이 떨어져서 보임
+                //horiLineMaxGroupNumber 이상이되면 가중치를 주고 다음라인으로 넘어가야됨
+                //가중치를 안줘도 되지만 안 줄 경우 그룹카드들이 짤려보이는 경우가 생길수 있음
                 if(currLine.groupNumber >= horiLineMaxGroupNumber)
                     setWeightLine(currLine);
             }
@@ -247,7 +250,9 @@ public class LineManagerOfResultActivity {
         Line newLine = new Line();
         newLine.addFail(context);
 
-        TableLayout.LayoutParams params = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f);
+        TableLayout.LayoutParams params = new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT, 1f);
         params.topMargin = 300;
 
         tableLayout.setLayoutParams(params);
