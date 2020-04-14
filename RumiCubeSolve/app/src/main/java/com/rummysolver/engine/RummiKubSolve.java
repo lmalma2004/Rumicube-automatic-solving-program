@@ -5,8 +5,6 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 
 public class RummiKubSolve {
@@ -14,8 +12,6 @@ public class RummiKubSolve {
     private static final int YELLOW = 1;
     private static final int BLUE   = 2;
     private static final int BLACK  = 3;
-    int cntForTesting = 0;
-
     public static class Card implements Serializable, Parcelable{
         int count_;
         int number_;
@@ -122,109 +118,130 @@ public class RummiKubSolve {
     public RummiKubSolve() {
         init();
     }
-    boolean canMakeGroup(int color, int number, boolean visited[][]){
+    boolean canMakeGroupOptimize(int color, int number){
         int preNumber1 = number - 2; int preCnt1;
         int preNumber2 = number - 1; int preCnt2;
         int nextNumber1 = number + 1; int nextCnt1;
         int nextNumber2 = number + 2; int nextCnt2;
-        preCnt1 = preNumber1 < 0 ? 0 : (cards[color][preNumber1].count_ > 0 ? 1 : 0);
-        preCnt2 = preNumber2 < 0 ? 0 : (cards[color][preNumber2].count_ > 0 ? 1 : 0);
-        nextCnt1 = nextNumber1 > 13 ? 0 : (cards[color][nextNumber1].count_ > 0 ? 1 : 0);
-        nextCnt2 = nextNumber2 > 13 ? 0 : (cards[color][nextNumber2].count_ > 0 ? 1 : 0);
-        if(number >= 3 && number <= 11){
-            if(nextCnt1 + nextCnt2 + jokerCnt >= 2) { //맨앞
-                visited[color][number] = true;
-                visited[color][nextCnt1] = true;
-                visited[color][nextCnt2] = true;
-                return true;
-            }
-            if(preCnt2 + nextCnt1 + jokerCnt>= 2) { //중간
-                visited[color][number] = true;
-                visited[color][preCnt1] = true;
-                visited[color][nextCnt1] = true;
-                return true;
-            }
-            if(preCnt1 + preCnt2 + jokerCnt>= 2) { //맨뒤
-                visited[color][number] = true;
-                visited[color][preCnt1] = true;
-                visited[color][preCnt2] = true;
-                return true;
-            }
+        int diffColorCnt[] = new int[4];
+        for(int i=0; i<4; i++)
+            diffColorCnt[i] = cards[i][number].count_;
+        diffColorCnt[color] = 0;
+
+        int remainCnt = cards[color][number].count_;
+        preCnt1 = preNumber1 < 0 ? 0 : cards[color][preNumber1].count_;
+        preCnt2 = preNumber2 < 0 ? 0 : cards[color][preNumber2].count_;
+        nextCnt1 = nextNumber1 > 13 ? 0 : cards[color][nextNumber1].count_;
+        nextCnt2 = nextNumber2 > 13 ? 0 : cards[color][nextNumber2].count_;
+
+        if(remainCnt == 3) {
+            int d = 4;
         }
-        else if(number < 3){
-            if(number == 1){
-                if(nextCnt1 + nextCnt2 + jokerCnt>= 2) {
-                    visited[color][number] = true;
-                    visited[color][nextCnt1] = true;
-                    visited[color][nextCnt2] = true;
-                    return true;
+
+        while(remainCnt > 0){
+            if(number >= 3 && number <= 11){
+                if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt >= 2) { //맨앞
+                    nextCnt1--;
+                    nextCnt2--;
+                    remainCnt--;
+                    continue;
+                }
+                if(getThresHolding(preCnt2) + getThresHolding(nextCnt1) + jokerCnt>= 2) { //중간
+                    preCnt2--;
+                    nextCnt1--;
+                    remainCnt--;
+                    continue;
+                }
+                if(getThresHolding(preCnt1) + getThresHolding(preCnt2) + jokerCnt>= 2) { //맨뒤
+                    preCnt1--;
+                    preCnt2--;
+                    remainCnt--;
+                    continue;
                 }
             }
-            else if(number == 2){
-                if(nextCnt1 + nextCnt2 + jokerCnt>= 2) {
-                    visited[color][number] = true;
-                    visited[color][nextCnt1] = true;
-                    visited[color][nextCnt2] = true;
-                    return true;
+            else if(number < 3){
+                if(number == 1){
+                    if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt>= 2) {
+                        nextCnt1--;
+                        nextCnt2--;
+                        remainCnt--;
+                        continue;
+                    }
                 }
-                if(preCnt2 + nextCnt1 + jokerCnt>= 2) {
-                    visited[color][number] = true;
-                    visited[color][preCnt2] = true;
-                    visited[color][nextCnt1] = true;
-                    return true;
-                }
-            }
-        }
-        else if(number > 11){
-            if(number == 12){
-                if(preCnt1 + preCnt2 + jokerCnt>= 2) {
-                    visited[color][number] = true;
-                    visited[color][preCnt1] = true;
-                    visited[color][preCnt2] = true;
-                    return true;
-                }
-                if(preCnt2 + nextCnt1 + jokerCnt>= 2) {
-                    visited[color][number] = true;
-                    visited[color][preCnt2] = true;
-                    visited[color][nextCnt1] = true;
-                    return true;
+                else if(number == 2){
+                    if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt>= 2) {
+                        nextCnt1--;
+                        nextCnt2--;
+                        remainCnt--;
+                        continue;
+                    }
+                    if(getThresHolding(preCnt2) + getThresHolding(nextCnt1) + jokerCnt>= 2) {
+                        preCnt2--;
+                        nextCnt1--;
+                        remainCnt--;
+                        continue;
+                    }
                 }
             }
-            else if(number == 13){
-                if(preCnt1 + preCnt2 + jokerCnt>= 2) {
-                    visited[color][number] = true;
-                    visited[color][preCnt1] = true;
-                    visited[color][preCnt2] = true;
-                    return true;
+            else if(number > 11){
+                if(number == 12){
+                    if(getThresHolding(preCnt1) + getThresHolding(preCnt2) + jokerCnt>= 2) {
+                        preCnt1--;
+                        preCnt2--;
+                        remainCnt--;
+                        continue;
+                    }
+                    if(getThresHolding(preCnt2) + getThresHolding(nextCnt1) + jokerCnt>= 2) {
+                        preCnt2--;
+                        nextCnt1--;
+                        remainCnt--;
+                        continue;
+                    }
+                }
+                else if(number == 13){
+                    if(getThresHolding(preCnt1) + getThresHolding(preCnt2) + jokerCnt>= 2) {
+                        preCnt1--;
+                        preCnt2--;
+                        remainCnt--;
+                        continue;
+                    }
                 }
             }
-        }
-        int diffColorSum = 0;
-        for(int i=0; i<4; i++){
-            if(i == color)
+            int diffColorSum = 0;
+            for(int i=0; i<4; i++){
+                if(i == color)
+                    continue;
+                if(diffColorCnt[i] > 0) {
+                    diffColorCnt[i]--;
+                    diffColorSum++;
+                }
+                if(diffColorSum >= 2)
+                    break;
+            }
+            if(diffColorSum + jokerCnt >= 2) {
+                remainCnt--;
                 continue;
-            if(cards[i][number].count_ > 0)
-                diffColorSum++;
-        }
-        if(diffColorSum + jokerCnt < 2)
+            }
             return false;
+        }
         return true;
     }
 
     boolean isPossible(){
-        boolean visited[][] = new boolean[4][14];
-        for(int i=0; i<4; i++)
-            for(int j=0; j<14; j++)
-                visited[i][j] = false;
-
+        //boolean visited[][] = new boolean[4][14];
+        //for(int i=0; i<4; i++)
+        //    for(int j=0; j<14; j++)
+        //        visited[i][j] = false;
         for(int i=0; i<4; i++){
             for(int j=1; j<14; j++){
                 int color = i;
                 int number = j;
-                if(visited[color][number])
-                    continue;
+                //if(visited[color][number])
+                //    continue;
                 if(cards[i][j].count_ > 0) {
-                    if (canMakeGroup(color, number, visited))
+                    //if (canMakeGroup(color, number, visited))
+                    //    continue;
+                    if(canMakeGroupOptimize(color, number))
                         continue;
                     else
                         return false;
@@ -327,7 +344,7 @@ public class RummiKubSolve {
         CardGroup group = new CardGroup();
         ArrayList<CardGroup> nextGroups = getIncludeCardGroups(color, number, false, group);
         addCard(color, number);
-        Collections.sort(nextGroups, new ComparatorGroup());
+        //Collections.sort(nextGroups, new ComparatorGroup());
         for(int g = 0; g < nextGroups.size(); g++){
             CardGroup currGroup = nextGroups.get(g);
             subGroup(currGroup);
@@ -345,7 +362,7 @@ public class RummiKubSolve {
         CardGroup group = new CardGroup();
         ArrayList<CardGroup> nextGroups = getIncludeCardGroups(color, number, true, group);
         addCard(0, 0);
-        Collections.sort(nextGroups, new ComparatorGroup());
+        //Collections.sort(nextGroups, new ComparatorGroup());
         for(int g = 0; g < nextGroups.size(); g++){
             CardGroup currGroup = nextGroups.get(g);
             subGroup(currGroup);
@@ -361,12 +378,11 @@ public class RummiKubSolve {
 
 
     ArrayList<CardGroup> getMakeGroups(ArrayList<CardGroup> groups){
-        if(allCardCnt == 0){
+        if(allCardCnt == 0)
             return groups;
-        }
-        if(!isPossible()){
+        if(!isPossible())
             return null;
-        }
+
         for(int i=0; i<4; i++){
             for(int j=0; j<14; j++){
                 if(cards[i][j].count_ > 0){
@@ -512,105 +528,96 @@ public class RummiKubSolve {
     void printFail(){
         System.out.println("Impossible");
     }
-
-    int getThresHolding(int cnt){
-        return cnt > 0 ? 1 : 0;
-    }
-    //정당성 검증이 필요함
-    boolean canMakeGroup2(int color, int number){
+    boolean canMakeGroup(int color, int number, boolean visited[][]){
         int preNumber1 = number - 2; int preCnt1;
         int preNumber2 = number - 1; int preCnt2;
         int nextNumber1 = number + 1; int nextCnt1;
         int nextNumber2 = number + 2; int nextCnt2;
-        int remainCnt = cards[color][number].count_;
-
-        preCnt1 = preNumber1 < 0 ? 0 : cards[color][preNumber1].count_;
-        preCnt2 = preNumber2 < 0 ? 0 : cards[color][preNumber2].count_;
-        nextCnt1 = nextNumber1 > 13 ? 0 : cards[color][nextNumber1].count_;
-        nextCnt2 = nextNumber2 > 13 ? 0 : cards[color][nextNumber2].count_;
-
-        while(remainCnt > 0){
-            if(number >= 3 && number <= 11){
-                if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt >= 2) { //맨앞
-                    nextCnt1--;
-                    nextCnt2--;
-                    remainCnt--;
-                    continue;
-                }
-                if(getThresHolding(preCnt2) + getThresHolding(nextCnt1) + jokerCnt>= 2) { //중간
-                    preCnt2--;
-                    nextCnt1--;
-                    remainCnt--;
-                    continue;
-                }
-                if(getThresHolding(preCnt1) + getThresHolding(preCnt2) + jokerCnt>= 2) { //맨뒤
-                    preCnt1--;
-                    preCnt2--;
-                    remainCnt--;
-                    continue;
-                }
+        preCnt1 = preNumber1 < 0 ? 0 : (cards[color][preNumber1].count_ > 0 ? 1 : 0);
+        preCnt2 = preNumber2 < 0 ? 0 : (cards[color][preNumber2].count_ > 0 ? 1 : 0);
+        nextCnt1 = nextNumber1 > 13 ? 0 : (cards[color][nextNumber1].count_ > 0 ? 1 : 0);
+        nextCnt2 = nextNumber2 > 13 ? 0 : (cards[color][nextNumber2].count_ > 0 ? 1 : 0);
+        if(number >= 3 && number <= 11){
+            if(nextCnt1 + nextCnt2 + jokerCnt >= 2) { //맨앞
+                visited[color][number] = true;
+                visited[color][nextCnt1] = true;
+                visited[color][nextCnt2] = true;
+                return true;
             }
-            else if(number < 3){
-                if(number == 1){
-                    if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt>= 2) {
-                        nextCnt1--;
-                        nextCnt2--;
-                        remainCnt--;
-                        continue;
-                    }
-                }
-                else if(number == 2){
-                    if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt>= 2) {
-                        nextCnt1--;
-                        nextCnt2--;
-                        remainCnt--;
-                        continue;
-                    }
-                    if(getThresHolding(preCnt2) + getThresHolding(nextCnt1) + jokerCnt>= 2) {
-                        preCnt2--;
-                        nextCnt1--;
-                        remainCnt--;
-                        continue;
-                    }
-                }
+            if(preCnt2 + nextCnt1 + jokerCnt>= 2) { //중간
+                visited[color][number] = true;
+                visited[color][preCnt1] = true;
+                visited[color][nextCnt1] = true;
+                return true;
             }
-            else if(number > 11){
-                if(number == 12){
-                    if(getThresHolding(preCnt1) + getThresHolding(preCnt2) + jokerCnt>= 2) {
-                        preCnt1--;
-                        preCnt2--;
-                        remainCnt--;
-                        continue;
-                    }
-                    if(getThresHolding(preCnt2) + getThresHolding(nextCnt1) + jokerCnt>= 2) {
-                        preCnt2--;
-                        nextCnt1--;
-                        remainCnt--;
-                        continue;
-                    }
-                }
-                else if(number == 13){
-                    if(getThresHolding(preCnt1) + getThresHolding(preCnt2) + jokerCnt>= 2) {
-                        preCnt1--;
-                        preCnt2--;
-                        remainCnt--;
-                        continue;
-                    }
-                }
+            if(preCnt1 + preCnt2 + jokerCnt>= 2) { //맨뒤
+                visited[color][number] = true;
+                visited[color][preCnt1] = true;
+                visited[color][preCnt2] = true;
+                return true;
             }
-            int diffColorSum = 0;
-            for(int i=0; i<4; i++){
-                if(i == color)
-                    continue;
-                if(cards[i][number].count_ > 0)
-                    diffColorSum++;
-            }
-            if(diffColorSum + jokerCnt >= 2) {
-                remainCnt--;
-                continue;
-            }
-            return false;
         }
+        else if(number < 3){
+            if(number == 1){
+                if(nextCnt1 + nextCnt2 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][nextCnt1] = true;
+                    visited[color][nextCnt2] = true;
+                    return true;
+                }
+            }
+            else if(number == 2){
+                if(nextCnt1 + nextCnt2 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][nextCnt1] = true;
+                    visited[color][nextCnt2] = true;
+                    return true;
+                }
+                if(preCnt2 + nextCnt1 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][preCnt2] = true;
+                    visited[color][nextCnt1] = true;
+                    return true;
+                }
+            }
+        }
+        else if(number > 11){
+            if(number == 12){
+                if(preCnt1 + preCnt2 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][preCnt1] = true;
+                    visited[color][preCnt2] = true;
+                    return true;
+                }
+                if(preCnt2 + nextCnt1 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][preCnt2] = true;
+                    visited[color][nextCnt1] = true;
+                    return true;
+                }
+            }
+            else if(number == 13){
+                if(preCnt1 + preCnt2 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][preCnt1] = true;
+                    visited[color][preCnt2] = true;
+                    return true;
+                }
+            }
+        }
+        int diffColorSum = 0;
+        for(int i=0; i<4; i++){
+            if(i == color)
+                continue;
+            if(cards[i][number].count_ > 0)
+                diffColorSum++;
+        }
+        if(diffColorSum + jokerCnt < 2)
+            return false;
         return true;
+    }
+
+    int getThresHolding(int cnt){
+        return cnt > 0 ? 1 : 0;
     }
 }
