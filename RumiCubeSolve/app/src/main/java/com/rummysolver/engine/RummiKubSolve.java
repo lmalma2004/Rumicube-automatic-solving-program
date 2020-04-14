@@ -5,6 +5,9 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class RummiKubSolve {
     private static final int RED    = 0;
@@ -119,7 +122,6 @@ public class RummiKubSolve {
     public RummiKubSolve() {
         init();
     }
-    //visited최적화는 나중에..
     boolean canMakeGroup(int color, int number, boolean visited[][]){
         int preNumber1 = number - 2; int preCnt1;
         int preNumber2 = number - 1; int preCnt2;
@@ -130,35 +132,71 @@ public class RummiKubSolve {
         nextCnt1 = nextNumber1 > 13 ? 0 : (cards[color][nextNumber1].count_ > 0 ? 1 : 0);
         nextCnt2 = nextNumber2 > 13 ? 0 : (cards[color][nextNumber2].count_ > 0 ? 1 : 0);
         if(number >= 3 && number <= 11){
-            if(nextCnt1 + nextCnt2 + jokerCnt >= 2) //맨앞
+            if(nextCnt1 + nextCnt2 + jokerCnt >= 2) { //맨앞
+                visited[color][number] = true;
+                visited[color][nextCnt1] = true;
+                visited[color][nextCnt2] = true;
                 return true;
-            if(preCnt2 + nextCnt1 + jokerCnt>= 2) //중간
+            }
+            if(preCnt2 + nextCnt1 + jokerCnt>= 2) { //중간
+                visited[color][number] = true;
+                visited[color][preCnt1] = true;
+                visited[color][nextCnt1] = true;
                 return true;
-            if(preCnt1 + preCnt2 + jokerCnt>= 2) //맨뒤
+            }
+            if(preCnt1 + preCnt2 + jokerCnt>= 2) { //맨뒤
+                visited[color][number] = true;
+                visited[color][preCnt1] = true;
+                visited[color][preCnt2] = true;
                 return true;
+            }
         }
         else if(number < 3){
             if(number == 1){
-                if(nextCnt1 + nextCnt2 + jokerCnt>= 2)
+                if(nextCnt1 + nextCnt2 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][nextCnt1] = true;
+                    visited[color][nextCnt2] = true;
                     return true;
+                }
             }
             else if(number == 2){
-                if(nextCnt1 + nextCnt2 + jokerCnt>= 2)
+                if(nextCnt1 + nextCnt2 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][nextCnt1] = true;
+                    visited[color][nextCnt2] = true;
                     return true;
-                if(preCnt2 + nextCnt1 + jokerCnt>= 2)
+                }
+                if(preCnt2 + nextCnt1 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][preCnt2] = true;
+                    visited[color][nextCnt1] = true;
                     return true;
+                }
             }
         }
         else if(number > 11){
             if(number == 12){
-                if(preCnt1 + preCnt2 + jokerCnt>= 2)
+                if(preCnt1 + preCnt2 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][preCnt1] = true;
+                    visited[color][preCnt2] = true;
                     return true;
-                if(preCnt2 + nextCnt1 + jokerCnt>= 2)
+                }
+                if(preCnt2 + nextCnt1 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][preCnt2] = true;
+                    visited[color][nextCnt1] = true;
                     return true;
+                }
             }
             else if(number == 13){
-                if(preCnt1 + preCnt2 + jokerCnt>= 2)
+                if(preCnt1 + preCnt2 + jokerCnt>= 2) {
+                    visited[color][number] = true;
+                    visited[color][preCnt1] = true;
+                    visited[color][preCnt2] = true;
                     return true;
+                }
             }
         }
         int diffColorSum = 0;
@@ -175,14 +213,16 @@ public class RummiKubSolve {
 
     boolean isPossible(){
         boolean visited[][] = new boolean[4][14];
-        //for(int i=0; i<4; i++)
-        //    for(int j=0; j<14; j++)
-        //        visited[i][j] = false;
+        for(int i=0; i<4; i++)
+            for(int j=0; j<14; j++)
+                visited[i][j] = false;
 
         for(int i=0; i<4; i++){
             for(int j=1; j<14; j++){
                 int color = i;
                 int number = j;
+                if(visited[color][number])
+                    continue;
                 if(cards[i][j].count_ > 0) {
                     if (canMakeGroup(color, number, visited))
                         continue;
@@ -202,12 +242,14 @@ public class RummiKubSolve {
         return false;
     }
 
-    void getSameNumGroups(CardGroup group, ArrayList<CardGroup> retGroup){
+    void getSameNumGroups(CardGroup group, ArrayList<CardGroup> retGroup, int turnOfColor){
+        if(group.cards_.size() >= 6)
+            return;
         if(group.cards_.size() >= 3) {
             CardGroup addGroup = group.clone_();
             retGroup.add(addGroup);
         }
-        for(int i=0; i<4; i++){
+        for(int i = turnOfColor; i < 4; i++){
             int currColor = i;
             if(searchColor(group, currColor)) continue;
             int number = group.cards_.get(0).number_;
@@ -215,7 +257,7 @@ public class RummiKubSolve {
             subCard(currColor, number);
             Card card = new Card(number, currColor, false);
             group.cards_.add(card);
-            getSameNumGroups(group, retGroup);
+            getSameNumGroups(group, retGroup, currColor);
             addCard(currColor, number);
             group.cards_.remove(card);
         }
@@ -227,13 +269,15 @@ public class RummiKubSolve {
                 subCard(0, 0);
                 Card card = new Card(number, currColor, true);
                 group.cards_.add(card);
-                getSameNumGroups(group, retGroup);
+                getSameNumGroups(group, retGroup, currColor);
                 addCard(0, 0);
                 group.cards_.remove(card);
             }
         }
     }
     void getDiffNumGroups(CardGroup group, ArrayList<CardGroup> retGroup){
+        if(group.cards_.size() >= 6)
+            return;
         if(group.cards_.size() >= 3){
             CardGroup addGroup = group.clone_();
             retGroup.add(addGroup);
@@ -265,16 +309,25 @@ public class RummiKubSolve {
         Card card = new Card(number, color, joker);
         group.cards_.add(card);
         ArrayList<CardGroup> retGroups = new ArrayList<CardGroup>();
-        getSameNumGroups(group, retGroups);
+        getSameNumGroups(group, retGroups, 0);
         getDiffNumGroups(group, retGroups);
         return retGroups;
     }
 
+    class ComparatorGroup implements Comparator<CardGroup>{
+        @Override
+        public int compare(CardGroup o1, CardGroup o2) {
+            Integer o1Size = o1.cards_.size();
+            Integer o2Size = o2.cards_.size();
+            return o2Size.compareTo(o1Size);
+        }
+    }
     ArrayList<CardGroup> process(int color, int number, ArrayList<CardGroup> groups){
         subCard(color, number);
         CardGroup group = new CardGroup();
         ArrayList<CardGroup> nextGroups = getIncludeCardGroups(color, number, false, group);
         addCard(color, number);
+        Collections.sort(nextGroups, new ComparatorGroup());
         for(int g = 0; g < nextGroups.size(); g++){
             CardGroup currGroup = nextGroups.get(g);
             subGroup(currGroup);
@@ -292,6 +345,7 @@ public class RummiKubSolve {
         CardGroup group = new CardGroup();
         ArrayList<CardGroup> nextGroups = getIncludeCardGroups(color, number, true, group);
         addCard(0, 0);
+        Collections.sort(nextGroups, new ComparatorGroup());
         for(int g = 0; g < nextGroups.size(); g++){
             CardGroup currGroup = nextGroups.get(g);
             subGroup(currGroup);
@@ -457,5 +511,106 @@ public class RummiKubSolve {
     }
     void printFail(){
         System.out.println("Impossible");
+    }
+
+    int getThresHolding(int cnt){
+        return cnt > 0 ? 1 : 0;
+    }
+    //정당성 검증이 필요함
+    boolean canMakeGroup2(int color, int number){
+        int preNumber1 = number - 2; int preCnt1;
+        int preNumber2 = number - 1; int preCnt2;
+        int nextNumber1 = number + 1; int nextCnt1;
+        int nextNumber2 = number + 2; int nextCnt2;
+        int remainCnt = cards[color][number].count_;
+
+        preCnt1 = preNumber1 < 0 ? 0 : cards[color][preNumber1].count_;
+        preCnt2 = preNumber2 < 0 ? 0 : cards[color][preNumber2].count_;
+        nextCnt1 = nextNumber1 > 13 ? 0 : cards[color][nextNumber1].count_;
+        nextCnt2 = nextNumber2 > 13 ? 0 : cards[color][nextNumber2].count_;
+
+        while(remainCnt > 0){
+            if(number >= 3 && number <= 11){
+                if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt >= 2) { //맨앞
+                    nextCnt1--;
+                    nextCnt2--;
+                    remainCnt--;
+                    continue;
+                }
+                if(getThresHolding(preCnt2) + getThresHolding(nextCnt1) + jokerCnt>= 2) { //중간
+                    preCnt2--;
+                    nextCnt1--;
+                    remainCnt--;
+                    continue;
+                }
+                if(getThresHolding(preCnt1) + getThresHolding(preCnt2) + jokerCnt>= 2) { //맨뒤
+                    preCnt1--;
+                    preCnt2--;
+                    remainCnt--;
+                    continue;
+                }
+            }
+            else if(number < 3){
+                if(number == 1){
+                    if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt>= 2) {
+                        nextCnt1--;
+                        nextCnt2--;
+                        remainCnt--;
+                        continue;
+                    }
+                }
+                else if(number == 2){
+                    if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt>= 2) {
+                        nextCnt1--;
+                        nextCnt2--;
+                        remainCnt--;
+                        continue;
+                    }
+                    if(getThresHolding(preCnt2) + getThresHolding(nextCnt1) + jokerCnt>= 2) {
+                        preCnt2--;
+                        nextCnt1--;
+                        remainCnt--;
+                        continue;
+                    }
+                }
+            }
+            else if(number > 11){
+                if(number == 12){
+                    if(getThresHolding(preCnt1) + getThresHolding(preCnt2) + jokerCnt>= 2) {
+                        preCnt1--;
+                        preCnt2--;
+                        remainCnt--;
+                        continue;
+                    }
+                    if(getThresHolding(preCnt2) + getThresHolding(nextCnt1) + jokerCnt>= 2) {
+                        preCnt2--;
+                        nextCnt1--;
+                        remainCnt--;
+                        continue;
+                    }
+                }
+                else if(number == 13){
+                    if(getThresHolding(preCnt1) + getThresHolding(preCnt2) + jokerCnt>= 2) {
+                        preCnt1--;
+                        preCnt2--;
+                        remainCnt--;
+                        continue;
+                    }
+                }
+            }
+            int diffColorSum = 0;
+            for(int i=0; i<4; i++){
+                if(i == color)
+                    continue;
+                if(cards[i][number].count_ > 0)
+                    diffColorSum++;
+            }
+            if(diffColorSum + jokerCnt >= 2) {
+                remainCnt--;
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 }
