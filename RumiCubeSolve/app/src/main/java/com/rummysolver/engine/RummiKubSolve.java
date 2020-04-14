@@ -108,6 +108,14 @@ public class RummiKubSolve {
             parcel.writeTypedList(cards_);
         }
     }
+    class ComparatorGroup implements Comparator<CardGroup>{
+        @Override
+        public int compare(CardGroup o1, CardGroup o2) {
+            Integer o1Size = o1.cards_.size();
+            Integer o2Size = o2.cards_.size();
+            return o2Size.compareTo(o1Size);
+        }
+    }
 
     public Card cards[][] = new Card[4][14];
     public int colorCnt[] = new int[4];
@@ -134,10 +142,8 @@ public class RummiKubSolve {
         nextCnt1 = nextNumber1 > 13 ? 0 : cards[color][nextNumber1].count_;
         nextCnt2 = nextNumber2 > 13 ? 0 : cards[color][nextNumber2].count_;
 
-        if(remainCnt == 3) {
-            int d = 4;
-        }
-
+        //color, number의 카드수 만큼 조합을 할 수 있어야 함
+        //탐욕적으로 조합가능한 경우를 카운팅
         while(remainCnt > 0){
             if(number >= 3 && number <= 11){
                 if(getThresHolding(nextCnt1) + getThresHolding(nextCnt2) + jokerCnt >= 2) { //맨앞
@@ -226,21 +232,12 @@ public class RummiKubSolve {
         }
         return true;
     }
-
     boolean isPossible(){
-        //boolean visited[][] = new boolean[4][14];
-        //for(int i=0; i<4; i++)
-        //    for(int j=0; j<14; j++)
-        //        visited[i][j] = false;
         for(int i=0; i<4; i++){
             for(int j=1; j<14; j++){
                 int color = i;
                 int number = j;
-                //if(visited[color][number])
-                //    continue;
                 if(cards[i][j].count_ > 0) {
-                    //if (canMakeGroup(color, number, visited))
-                    //    continue;
                     if(canMakeGroupOptimize(color, number))
                         continue;
                     else
@@ -250,7 +247,6 @@ public class RummiKubSolve {
         }
         return true;
     }
-
     boolean searchColor(CardGroup group, int color){
         for(int i=0; i<group.cards_.size(); i++){
             if(group.cards_.get(i).color_ == color)
@@ -258,7 +254,6 @@ public class RummiKubSolve {
         }
         return false;
     }
-
     void getSameNumGroups(CardGroup group, ArrayList<CardGroup> retGroup, int turnOfColor){
         if(group.cards_.size() >= 6)
             return;
@@ -321,7 +316,6 @@ public class RummiKubSolve {
             group.cards_.remove(card);
         }
     }
-    //같은숫자로 만들어진 그룹, 다른숫자로 만들어진 그룹들을 반환해야함
     ArrayList<CardGroup> getIncludeCardGroups(int color, int number, boolean joker, CardGroup group){
         Card card = new Card(number, color, joker);
         group.cards_.add(card);
@@ -329,15 +323,6 @@ public class RummiKubSolve {
         getSameNumGroups(group, retGroups, 0);
         getDiffNumGroups(group, retGroups);
         return retGroups;
-    }
-
-    class ComparatorGroup implements Comparator<CardGroup>{
-        @Override
-        public int compare(CardGroup o1, CardGroup o2) {
-            Integer o1Size = o1.cards_.size();
-            Integer o2Size = o2.cards_.size();
-            return o2Size.compareTo(o1Size);
-        }
     }
     ArrayList<CardGroup> process(int color, int number, ArrayList<CardGroup> groups){
         subCard(color, number);
@@ -375,8 +360,6 @@ public class RummiKubSolve {
         }
         return null;
     }
-
-
     ArrayList<CardGroup> getMakeGroups(ArrayList<CardGroup> groups){
         if(allCardCnt == 0)
             return groups;
@@ -409,14 +392,11 @@ public class RummiKubSolve {
         }
         return null;
     }
-
     ArrayList<CardGroup> solve(){
         ArrayList<CardGroup> groups = new ArrayList<CardGroup>();
         groups = getMakeGroups(groups);
         return groups;
     }
-
-
     RummiKubSolve clone_(){
         RummiKubSolve ret = new RummiKubSolve();
         for(int i=0; i<4; i++)
@@ -503,6 +483,9 @@ public class RummiKubSolve {
             cards[0][0].joker_ = false;
         jokerCnt--;
         allCardCnt--;
+    }
+    int getThresHolding(int cnt){
+        return cnt > 0 ? 1 : 0;
     }
     void printResult(final ArrayList<CardGroup> groups){
         System.out.println(groups.size());
@@ -615,9 +598,5 @@ public class RummiKubSolve {
         if(diffColorSum + jokerCnt < 2)
             return false;
         return true;
-    }
-
-    int getThresHolding(int cnt){
-        return cnt > 0 ? 1 : 0;
     }
 }
