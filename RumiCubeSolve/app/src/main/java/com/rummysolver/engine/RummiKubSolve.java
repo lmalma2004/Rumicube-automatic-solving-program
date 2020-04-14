@@ -28,26 +28,6 @@ public class RummiKubSolve {
             joker_ = joker;
             count_ = 0;
         }
-
-        protected Card(Parcel in) {
-            count_ = in.readInt();
-            number_ = in.readInt();
-            color_ = in.readInt();
-            joker_ = in.readByte() != 0;
-        }
-
-        public static final Creator<Card> CREATOR = new Creator<Card>() {
-            @Override
-            public Card createFromParcel(Parcel in) {
-                return new Card(in);
-            }
-
-            @Override
-            public Card[] newArray(int size) {
-                return new Card[size];
-            }
-        };
-
         void addCard(){
             count_++;
         }
@@ -62,11 +42,28 @@ public class RummiKubSolve {
             ret.joker_ = joker_;
             return ret;
         }
+
+        protected Card(Parcel in) {
+            count_ = in.readInt();
+            number_ = in.readInt();
+            color_ = in.readInt();
+            joker_ = in.readByte() != 0;
+        }
+        public static final Creator<Card> CREATOR = new Creator<Card>() {
+            @Override
+            public Card createFromParcel(Parcel in) {
+                return new Card(in);
+            }
+
+            @Override
+            public Card[] newArray(int size) {
+                return new Card[size];
+            }
+        };
         @Override
         public int describeContents() {
             return 0;
         }
-
         @Override
         public void writeToParcel(Parcel parcel, int i) {
             parcel.writeInt(count_);
@@ -75,18 +72,14 @@ public class RummiKubSolve {
             parcel.writeByte((byte) (joker_ ? 1 : 0));
         }
     }
-
     public static class CardGroup implements Parcelable{
         ArrayList<Card> cards_;
-
         public CardGroup(){
 
         }
-
         protected CardGroup(Parcel in) {
             cards_ = in.createTypedArrayList(Card.CREATOR);
         }
-
         public static final Creator<CardGroup> CREATOR = new Creator<CardGroup>() {
             @Override
             public CardGroup createFromParcel(Parcel in) {
@@ -98,12 +91,10 @@ public class RummiKubSolve {
                 return new CardGroup[size];
             }
         };
-
         @Override
         public int describeContents() {
             return 0;
         }
-
         @Override
         public void writeToParcel(Parcel parcel, int i) {
             parcel.writeTypedList(cards_);
@@ -120,13 +111,35 @@ public class RummiKubSolve {
         init();
     }
 
-    //boolean isPossible(){
+    boolean isPossible(int color, int number){
+        int diffColorCardCnt = 0;
+        int diffNumCardCnt = 0;
+        int nextNumber1 = number + 1;
+        int nextNumber2 = number + 2;
 
-    //}
+        for(int i=1; i<4; i++) {
+            if(i == color)
+                continue;
+            diffColorCardCnt += cards[i][number].count_;
+        }
+        if(diffColorCardCnt + jokerCnt >= 2)
+            return true;
+        if(number >= 12)
+            return false;
+
+        diffNumCardCnt += cards[color][nextNumber1].count_;
+        diffNumCardCnt += cards[color][nextNumber2].count_;
+
+        if(diffNumCardCnt + jokerCnt >= 2)
+            return true;
+        return false;
+    }
+
+    //color : i / number : j 인 카드를 맨앞으로 하는 조합을 만들어 본다.
     boolean isMake(int color, int number, ArrayList<CardGroup> groups, int remainCard){
         if (remainCard == 0)
             return true;
-        //if(!isPossible())
+        //if(!isPossible(color, number))
         //    return false;
         cards[color][number].subCard();
         remainCard--;
@@ -142,23 +155,24 @@ public class RummiKubSolve {
                     for (int gSize = 3; gSize < 5; gSize++) {
                         //gSize - jokerCnt 인 이유 : 현재여긴 조커인 경우의 구문, 조커 포함그룹은 gSize보다 1만큼 작은 숫자들을 가지고 있어도 됨
                         //예시: 그룹이 joker / 1 blue / 1 red 라면 gSize는 3이지만 1의 개수는 2개로 조합이 가능하다.
-                        if (numberCnt[currNumber] < gSize - jokerCnt)
-                            break;
-                        ArrayList<Card> card = new ArrayList<Card>();
-                        Card currCard = new Card(currNumber, currColor, true);
-                        card.add(currCard);
-                        if (makeSameNum(gSize, card, groups, remainCard))
+                        //if (numberCnt[currNumber] < gSize - cards[0][0].count_)
+                        //    break;
+                        ArrayList<Card> cards= new ArrayList<Card>();
+                        Card card = new Card(currNumber, currColor, true);
+                        cards.add(card);
+                        //gSize크기의 같은숫자 ,다른색 조합을 만들고 다른카드들을 모두 조합할수있었다면
+                        if (makeSameNum(gSize, cards, groups, remainCard))
                             return true;
                     }
                     //다른숫자, 같은색 조합시도 (min : 3 , max : 13개)
                     for (int nSize = 3; nSize < 6; nSize++) {
                         //nSize - 1 인 이유 : gSize의 설명과 같음.
-                        if (colorCnt[currColor] < nSize - jokerCnt)
-                            break;
-                        ArrayList<Card> card = new ArrayList<Card>();
-                        Card currCard = new Card(currNumber, currColor, true);
-                        card.add(currCard);
-                        if (makeDiffNum(nSize, card, groups, remainCard))
+                        //if (colorCnt[currColor] < nSize - cards[0][0].count_)
+                        //    break;
+                        ArrayList<Card> cards = new ArrayList<Card>();
+                        Card card = new Card(currNumber, currColor, true);
+                        cards.add(card);
+                        if (makeDiffNum(nSize, cards, groups, remainCard))
                             return true;
                     }
                 }
@@ -166,36 +180,36 @@ public class RummiKubSolve {
         }
         else {
             for (int gSize = 3; gSize < 5; gSize++) {
-                if (numberCnt[number] + jokerCnt < gSize)
-                    break;
-                ArrayList<Card> card = new ArrayList<Card>();
-                Card currCard = new Card(number, color, false);
-                card.add(currCard);
-                if (makeSameNum(gSize, card, groups, remainCard))
+                //if (numberCnt[number] + cards[0][0].count_ < gSize)
+                //    break;
+                ArrayList<Card> cards = new ArrayList<Card>();
+                Card card = new Card(number, color, false);
+                cards.add(card);
+                if (makeSameNum(gSize, cards, groups, remainCard))
                     return true;
             }
             //다른숫자, 같은색 조합시도 (min : 3 , max : 13개)
             for (int nSize = 3; nSize < 6; nSize++) {
-                if (colorCnt[color] + jokerCnt < nSize)
-                    break;
-                ArrayList<Card> card = new ArrayList<Card>();
-                Card currCard = new Card(number, color, false);
-                card.add(currCard);
-                if (makeDiffNum(nSize, card, groups, remainCard))
+                //if (colorCnt[color] + cards[0][0].count_ < nSize)
+                //    break;
+                ArrayList<Card> cards = new ArrayList<Card>();
+                Card card = new Card(number, color, false);
+                cards.add(card);
+                if (makeDiffNum(nSize, cards, groups, remainCard))
                     return true;
             }
         }
 
-        cards[color][number].addCard();
         remainCard++;
+        cards[color][number].addCard();
         return false;
     }
-    boolean makeSameNum(int grpSize, ArrayList<Card> card, ArrayList<CardGroup> grp, int remainCard){
-        if (card.size() == grpSize) {
+    boolean makeSameNum(int grpSize, ArrayList<Card> currCards, ArrayList<CardGroup> grp, int remainCard){
+        if (currCards.size() == grpSize) {
             if(remainCard != 0 && remainCard < 3)
                 return false;
             CardGroup newGrp = new CardGroup();
-            newGrp.cards_ = card;
+            newGrp.cards_ = currCards;
             grp.add(newGrp);
 
             if (remainCard == 0)
@@ -209,19 +223,17 @@ public class RummiKubSolve {
                         //실패하면 바로 리턴한다.
                         if (isMake(i, j, grp, remainCard))
                             return true;
-                        else {
-                            grp.remove(grp.size() - 1);
-                            return false;
-                        }
                     }
                 }
             }
+            grp.remove(grp.size() - 1);
+            return false;
         }
 
         for (int i = 0; i < 4; i++) {
             boolean isExist = false;
-            for (int j = 0; j < card.size(); j++) {
-                if (i == card.get(j).color_) {
+            for (int j = 0; j < currCards.size(); j++) {
+                if (i == currCards.get(j).color_) {
                     isExist = true;
                     break;
                 }
@@ -229,25 +241,25 @@ public class RummiKubSolve {
             //현재 카드조합에 없는 색을 찾음
             if (!isExist) {
                 //같은숫자, 없는 색의 카드를 찾는다.
-                int cardNumber = card.get(0).number_;
+                int cardNumber = currCards.get(0).number_;
                 int cardColor = i;
                 //조커를 찾는다면 숫자와 색을 정해줌
-                if (cards[0][0].count_ > 0) {
+                if (cards[0][0].count_ > 0 && numberCnt[cardNumber] >= grpSize - cards[0][0].count_) {
                     cards[0][0].subCard();
                     Card addCard = new Card(cardNumber, cardColor, true);
-                    card.add(addCard);
-                    if (makeSameNum(grpSize, card, grp, remainCard - 1))
+                    currCards.add(addCard);
+                    if (makeSameNum(grpSize, currCards, grp, remainCard - 1))
                         return true;
-                    card.remove(card.size() - 1);
+                    currCards.remove(currCards.size() - 1);
                     cards[0][0].addCard();
                 }
-                if (cards[cardColor][cardNumber].count_ > 0) {
+                if (cards[cardColor][cardNumber].count_ > 0 && numberCnt[cardNumber] >= grpSize) {
                     cards[cardColor][cardNumber].subCard();
                     Card addCard = new Card(cardNumber, cardColor, false);
-                    card.add(addCard);
-                    if (makeSameNum(grpSize, card, grp, remainCard - 1))
+                    currCards.add(addCard);
+                    if (makeSameNum(grpSize, currCards, grp, remainCard - 1))
                         return true;
-                    card.remove(card.size() - 1);
+                    currCards.remove(currCards.size() - 1);
                     cards[cardColor][cardNumber].addCard();
                 }
             }
@@ -275,13 +287,11 @@ public class RummiKubSolve {
                         //실패하면 바로 리턴한다.
                         if (isMake(i, j, grp, remainCard))
                             return true;
-                        else {
-                            grp.remove(grp.size() - 1);
-                            return false;
-                        }
                     }
                 }
             }
+            grp.remove(grp.size() - 1);
+            return false;
         }
 
         //다른숫자, 같은 색의 카드를 찾는다.
@@ -314,6 +324,22 @@ public class RummiKubSolve {
         return false;
 
     }
+    ArrayList<CardGroup> solve(){
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 14; j++) {
+                //color : i / number : j 인 카드를 맨앞으로 하는 조합을 만들어 본다.
+                if (cards[i][j].count_ != 0) {
+                    ArrayList<CardGroup> groups = new ArrayList<CardGroup>();
+                    if (isMake(i, j, groups, allCardCnt)) {
+                        //printResult(groups);
+                        return groups;
+                    }
+                }
+            }
+        }
+        //printFail();
+        return null;
+    }
     void init(){
         for (int i = 0; i < cards.length; i++) {
             cards[i] = new Card[14];
@@ -328,22 +354,6 @@ public class RummiKubSolve {
         jokerCnt = 0;
         allCardCnt = 0;
     }
-    ArrayList<CardGroup> solve(){
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 14; j++) {
-                //color : i / number : j 인 카드로 조합을 해본다.
-                if (cards[i][j].count_ != 0) {
-                    ArrayList<CardGroup> groups = new ArrayList<CardGroup>();
-                    if (isMake(i, j, groups, allCardCnt)) {
-                        //printResult(groups);
-                        return groups;
-                    }
-                }
-            }
-        }
-        //printFail();
-        return null;
-    }
     void addCard(int color, int number){
         cards[color][number].number_ = number;
         cards[color][number].color_ = color;
@@ -352,17 +362,17 @@ public class RummiKubSolve {
         colorCnt[color]++;
         allCardCnt++;
     }
-    void addJoker(){
-        cards[0][0].joker_ = true;
-        cards[0][0].addCard();
-        jokerCnt++;
-        allCardCnt++;
-    }
     void subCard(int color, int number){
         cards[color][number].subCard();
         numberCnt[number]--;
         colorCnt[color]--;
         allCardCnt--;
+    }
+    void addJoker(){
+        cards[0][0].joker_ = true;
+        cards[0][0].addCard();
+        jokerCnt++;
+        allCardCnt++;
     }
     void subJoker(){
         cards[0][0].subCard();
