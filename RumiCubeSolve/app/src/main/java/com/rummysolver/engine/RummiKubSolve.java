@@ -76,7 +76,15 @@ public class RummiKubSolve {
     public static class CardGroup implements Parcelable{
         ArrayList<Card> cards_;
         public CardGroup(){
-
+            cards_ = new ArrayList<Card>();
+        }
+        public CardGroup clone_(){
+            CardGroup newGroup = new CardGroup();
+            for(int i=0; i<cards_.size(); i++){
+                Card newCard = cards_.get(i).clone_();
+                newGroup.cards_.add(newCard);
+            }
+            return newGroup;
         }
         protected CardGroup(Parcel in) {
             cards_ = in.createTypedArrayList(Card.CREATOR);
@@ -111,243 +119,186 @@ public class RummiKubSolve {
     public RummiKubSolve() {
         init();
     }
-
-    int getDiffColorCardCnt(int color, int number){
-        int sum = 0;
-        for (int i = 1; i < 4; i++) {
+    //visited최적화는 나중에..
+    boolean canMakeGroup(int color, int number, boolean visited[][]){
+        int preNumber1 = number - 2; int preCnt1;
+        int preNumber2 = number - 1; int preCnt2;
+        int nextNumber1 = number + 1; int nextCnt1;
+        int nextNumber2 = number + 2; int nextCnt2;
+        preCnt1 = preNumber1 < 0 ? 0 : (cards[color][preNumber1].count_ > 0 ? 1 : 0);
+        preCnt2 = preNumber2 < 0 ? 0 : (cards[color][preNumber2].count_ > 0 ? 1 : 0);
+        nextCnt1 = nextNumber1 > 13 ? 0 : (cards[color][nextNumber1].count_ > 0 ? 1 : 0);
+        nextCnt2 = nextNumber2 > 13 ? 0 : (cards[color][nextNumber2].count_ > 0 ? 1 : 0);
+        if(number >= 3 && number <= 11){
+            if(nextCnt1 + nextCnt2 + jokerCnt >= 2) //맨앞
+                return true;
+            if(preCnt2 + nextCnt1 + jokerCnt>= 2) //중간
+                return true;
+            if(preCnt1 + preCnt2 + jokerCnt>= 2) //맨뒤
+                return true;
+        }
+        else if(number < 3){
+            if(number == 1){
+                if(nextCnt1 + nextCnt2 + jokerCnt>= 2)
+                    return true;
+            }
+            else if(number == 2){
+                if(nextCnt1 + nextCnt2 + jokerCnt>= 2)
+                    return true;
+                if(preCnt2 + nextCnt1 + jokerCnt>= 2)
+                    return true;
+            }
+        }
+        else if(number > 11){
+            if(number == 12){
+                if(preCnt1 + preCnt2 + jokerCnt>= 2)
+                    return true;
+                if(preCnt2 + nextCnt1 + jokerCnt>= 2)
+                    return true;
+            }
+            else if(number == 13){
+                if(preCnt1 + preCnt2 + jokerCnt>= 2)
+                    return true;
+            }
+        }
+        int diffColorSum = 0;
+        for(int i=0; i<4; i++){
             if(i == color)
                 continue;
-            sum += cards[i][number].count_;
+            if(cards[i][number].count_ > 0)
+                diffColorSum++;
         }
-        return sum;
-    }
-    int getDiffNumCardCnt(int color, int number1, int number2){
-        return cards[color][number1].count_ + cards[color][number2].count_;
-    }
-
-    boolean isPossible(int color, int number){
-        int diffColorCardCnt = getDiffColorCardCnt(color, number);
-        if(diffColorCardCnt + jokerCnt >= 2)
-            return true;
-
-        if(number >= 12)
+        if(diffColorSum + jokerCnt < 2)
             return false;
-        int diffNumCardCnt = getDiffNumCardCnt(color,number + 1, number + 2);
-        if(diffNumCardCnt + jokerCnt >= 2)
-            return true;
+        return true;
+    }
+
+    boolean isPossible(){
+        boolean visited[][] = new boolean[4][14];
+        for(int i=0; i<4; i++)
+            for(int j=0; j<14; j++)
+                visited[i][j] = false;
+
+        for(int i=0; i<4; i++){
+            for(int j=0; j<14; j++){
+                int color = i;
+                int number = j;
+                if(cards[i][j].count_ > 0) {
+                    if (canMakeGroup(color, number, visited))
+                        continue;
+                    else
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    boolean searchColor(CardGroup group, int color){
+        for(int i=0; i<group.cards_.size(); i++){
+            if(group.cards_.get(i).color_ == color)
+                return true;
+        }
         return false;
     }
 
-    //color : i / number : j 인 카드를 맨앞으로 하는 조합을 만들어 본다.
-    boolean isMake(int color, int number, ArrayList<CardGroup> groups, int remainCard){
-        cntForTesting++;
-        if (remainCard == 0)
-            return true;
-        if(!isPossible(color, number))
-            return false;
-        subCard(color, number);
-        //cards[color][number].subCard();
-        remainCard--;
-        //조커인 경우
-        //조커인 경우 모든 카드로 시도하지않고 후보들을 추린다면 시간복잡도가 줄것..
-        //후보들을 어떻게 추릴까
-        if (number == 0) {
-            for (int i = 0; i < 4; i++) {
-                for (int j = 1; j < 14; j++) {
-                    int currColor = i;
-                    int currNumber = j;
-                    //같은숫자, 다른색 조합시도
-                    for (int gSize = 3; gSize < 5; gSize++) {
-                        //gSize - jokerCnt 인 이유 : 현재여긴 조커인 경우의 구문, 조커 포함그룹은 gSize보다 1만큼 작은 숫자들을 가지고 있어도 됨
-                        //예시: 그룹이 joker / 1 blue / 1 red 라면 gSize는 3이지만 1의 개수는 2개로 조합이 가능하다.
-                        //if (numberCnt[currNumber] < gSize - cards[0][0].count_)
-                        //    break;
-                        ArrayList<Card> cards= new ArrayList<Card>();
-                        Card card = new Card(currNumber, currColor, true);
-                        cards.add(card);
-                        //gSize크기의 같은숫자 ,다른색 조합을 만들고 다른카드들을 모두 조합할수있었다면
-                        if (makeSameNum(gSize, cards, groups, remainCard))
-                            return true;
-                    }
-                    //다른숫자, 같은색 조합시도 (min : 3 , max : 13개)
-                    for (int nSize = 3; nSize < 6; nSize++) {
-                        //nSize - 1 인 이유 : gSize의 설명과 같음.
-                        //if (colorCnt[currColor] < nSize - cards[0][0].count_)
-                        //    break;
-                        ArrayList<Card> cards = new ArrayList<Card>();
-                        Card card = new Card(currNumber, currColor, true);
-                        cards.add(card);
-                        if (makeDiffNum(nSize, cards, groups, remainCard))
-                            return true;
-                    }
-                }
-            }
+    void getSameNumGroups(CardGroup group, ArrayList<CardGroup> retGroup){
+        if(group.cards_.size() >= 3) {
+            CardGroup addGroup = group.clone_();
+            retGroup.add(addGroup);
         }
-        else {
-            for (int gSize = 3; gSize < 5; gSize++) {
-                //if (numberCnt[number] + cards[0][0].count_ < gSize)
-                //    break;
-                ArrayList<Card> cards = new ArrayList<Card>();
-                Card card = new Card(number, color, false);
-                cards.add(card);
-                if (makeSameNum(gSize, cards, groups, remainCard))
-                    return true;
-            }
-            //다른숫자, 같은색 조합시도 (min : 3 , max : 13개)
-            for (int nSize = 3; nSize < 6; nSize++) {
-                //if (colorCnt[color] + cards[0][0].count_ < nSize)
-                //    break;
-                ArrayList<Card> cards = new ArrayList<Card>();
-                Card card = new Card(number, color, false);
-                cards.add(card);
-                if (makeDiffNum(nSize, cards, groups, remainCard))
-                    return true;
-            }
+        for(int i=0; i<4; i++){
+            int currColor = i;
+            if(searchColor(group, currColor)) continue;
+            int number = group.cards_.get(0).number_;
+            if(cards[currColor][number].count_ == 0) continue;
+            subCard(currColor, number);
+            Card card = new Card(number, currColor, false);
+            group.cards_.add(card);
+            getSameNumGroups(group, retGroup);
+            addCard(currColor, number);
+            group.cards_.remove(card);
         }
-
-        remainCard++;
-        addCard(color, number);
-        //cards[color][number].addCard();
-        return false;
     }
-    boolean makeSameNum(int grpSize, ArrayList<Card> currCards, ArrayList<CardGroup> grp, int remainCard){
-        if (currCards.size() == grpSize) {
-            if(remainCard != 0 && remainCard < 3)
-                return false;
-            CardGroup newGrp = new CardGroup();
-            newGrp.cards_ = currCards;
-            grp.add(newGrp);
-
-            if (remainCard == 0)
-                return true;
-
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 14; j++) {
-                    //color : i / number : j 인 카드로 조합을 해본다.
-                    if (cards[i][j].count_ != 0) {
-                        //solve()단계에서 i,j로 시작해서 만드는 모든 그룹을 시도하기 때문에
-                        //실패하면 바로 리턴한다.
-                        if (isMake(i, j, grp, remainCard))
-                            return true;
-                    }
-                }
-            }
-            grp.remove(grp.size() - 1);
-            return false;
+    void getDiffNumGroups(CardGroup group, ArrayList<CardGroup> retGroup){
+        if(group.cards_.size() >= 3){
+            CardGroup addGroup = group.clone_();
+            retGroup.add(addGroup);
         }
-
-        for (int i = 0; i < 4; i++) {
-            boolean isExist = false;
-            for (int j = 0; j < currCards.size(); j++) {
-                if (i == currCards.get(j).color_) {
-                    isExist = true;
-                    break;
-                }
-            }
-            //현재 카드조합에 없는 색을 찾음
-            if (!isExist) {
-                //같은숫자, 없는 색의 카드를 찾는다.
-                int cardNumber = currCards.get(0).number_;
-                int remainGrpSize = grpSize - currCards.size();
-                int cardColor = i;
-                //조커를 찾는다면 숫자와 색을 정해줌
-                if (jokerCnt > 0 && numberCnt[cardNumber] >= remainGrpSize - jokerCnt) {
-                    subCard(0, 0);
-                    Card addCard = new Card(cardNumber, cardColor, true);
-                    currCards.add(addCard);
-                    if (makeSameNum(grpSize, currCards, grp, remainCard - 1))
-                        return true;
-                    currCards.remove(currCards.size() - 1);
-                    addCard(0, 0);
-                }
-                if (cards[cardColor][cardNumber].count_ > 0 && numberCnt[cardNumber] >= remainGrpSize - jokerCnt) {
-                    subCard(cardColor, cardNumber);
-                    Card addCard = new Card(cardNumber, cardColor, false);
-                    currCards.add(addCard);
-                    if (makeSameNum(grpSize, currCards, grp, remainCard - 1))
-                        return true;
-                    currCards.remove(currCards.size() - 1);
-                    addCard(cardColor, cardNumber);
-                }
-            }
+        int nextNumber = group.cards_.get(group.cards_.size() - 1).number_ + 1;
+        if(nextNumber >= 14)
+            return;
+        int color = group.cards_.get(0).color_;
+        if(cards[color][nextNumber].count_ > 0){
+            subCard(color, nextNumber);
+            Card card = new Card(nextNumber, color, false);
+            group.cards_.add(card);
+            getDiffNumGroups(group, retGroup);
+            addCard(color, nextNumber);
+            group.cards_.remove(card);
         }
-        return false;
-
     }
-    boolean makeDiffNum(int numSize, ArrayList<Card> card, ArrayList<CardGroup> grp, int remainCard){
-        //조합을 마친경우
-        if (card.size() == numSize) {
-            if(remainCard != 0 && remainCard < 3)
-                return false;
-            CardGroup newGrp = new CardGroup();
-            newGrp.cards_ = card;
-            grp.add(newGrp);
-
-            if (remainCard == 0)
-                return true;
-
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 14; j++) {
-                    //color : i / number : j 인 카드로 조합을 해본다.
-                    if (cards[i][j].count_ != 0) {
-                        //solve()단계에서 i,j로 시작해서 만드는 모든 그룹을 시도하기 때문에
-                        //실패하면 바로 리턴한다.
-                        if (isMake(i, j, grp, remainCard))
-                            return true;
-                    }
-                }
-            }
-            grp.remove(grp.size() - 1);
-            return false;
-        }
-
-        //다른숫자, 같은 색의 카드를 찾는다.
-        int cardNumber = card.get(card.size() - 1).number_;
-        int cardColor = card.get(card.size() - 1).color_;
-        int nextNumber = cardNumber + 1;
-        if (nextNumber == 14)
-            return false;
-
-        //조커를 찾는다면 숫자와 색을 nextNumber와 cardColor로 정해준다.
-        if (jokerCnt > 0) {
-            subCard(0, 0);
-            Card addCard = new Card(nextNumber, cardColor, true);
-            card.add(addCard);
-            if (makeDiffNum(numSize, card, grp, remainCard - 1))
-                return true;
-            card.remove(card.size() - 1);
-            addCard(0, 0);
-        }
-        if (cards[cardColor][nextNumber].count_ > 0) {
-            subCard(cardColor, nextNumber);
-            Card addCard = new Card(nextNumber, cardColor, false);
-            card.add(addCard);
-            if (makeDiffNum(numSize, card, grp, remainCard - 1))
-                return true;
-            card.remove(card.size() - 1);
-            addCard(cardColor, nextNumber);
-        }
-        return false;
-
+    //같은숫자로 만들어진 그룹, 다른숫자로 만들어진 그룹들을 반환해야함
+    ArrayList<CardGroup> getIncludeCardGroups(int color, int number, CardGroup group){
+        Card card = new Card(number, color, false);
+        group.cards_.add(card);
+        ArrayList<CardGroup> retGroups = new ArrayList<CardGroup>();
+        getSameNumGroups(group, retGroups);
+        getDiffNumGroups(group, retGroups);
+        return retGroups;
     }
 
+    void subGroup(CardGroup group){
+        for(int i=0; i<group.cards_.size(); i++){
+            int color = group.cards_.get(i).color_;
+            int number = group.cards_.get(i).number_;
+            subCard(color, number);
+        }
+    }
+    void addGroup(CardGroup group){
+        for(int i=0; i<group.cards_.size(); i++){
+            int color = group.cards_.get(i).color_;
+            int number = group.cards_.get(i).number_;
+            addCard(color, number);
+        }
+    }
 
+    ArrayList<CardGroup> getMakeGroups(ArrayList<CardGroup> groups){
+        if(allCardCnt == 0){
+            return groups;
+        }
+        if(!isPossible()){
+            return null;
+        }
+        for(int i=0; i<4; i++){
+            for(int j=0; j<14; j++){
+                if(cards[i][j].count_ > 0){
+                    int nextColor = i;
+                    int nextNumber = j;
+                    subCard(nextColor, nextNumber);
+                    CardGroup group = new CardGroup();
+                    ArrayList<CardGroup> nextGroups = getIncludeCardGroups(nextColor, nextNumber, group);
+                    addCard(nextColor, nextNumber);
+                    for(int g = 0; g < nextGroups.size(); g++){
+                        CardGroup currGroup = nextGroups.get(g);
+                        subGroup(currGroup);
+                        groups.add(currGroup);
+                        ArrayList<CardGroup> retGroup = getMakeGroups(groups);
+                        if(retGroup != null)
+                            return retGroup;
+                        groups.remove(currGroup);
+                        addGroup(currGroup);
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     ArrayList<CardGroup> solve(){
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 14; j++) {
-                //color : i / number : j 인 카드를 맨앞으로 하는 조합을 만들어 본다.
-                if (cards[i][j].count_ != 0) {
-                    ArrayList<CardGroup> groups = new ArrayList<CardGroup>();
-                    if (isMake(i, j, groups, allCardCnt)) {
-                        //printResult(groups);
-                        return groups;
-                    }
-                }
-            }
-        }
-        //printFail();
-        return null;
+        ArrayList<CardGroup> groups = new ArrayList<CardGroup>();
+        groups = getMakeGroups(groups);
+        return groups;
     }
     void init(){
         for (int i = 0; i < cards.length; i++) {
