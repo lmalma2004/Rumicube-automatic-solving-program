@@ -175,12 +175,12 @@ public class RummiKubSolve {
 
     boolean isPossible(){
         boolean visited[][] = new boolean[4][14];
-        for(int i=0; i<4; i++)
-            for(int j=0; j<14; j++)
-                visited[i][j] = false;
+        //for(int i=0; i<4; i++)
+        //    for(int j=0; j<14; j++)
+        //        visited[i][j] = false;
 
         for(int i=0; i<4; i++){
-            for(int j=0; j<14; j++){
+            for(int j=1; j<14; j++){
                 int color = i;
                 int number = j;
                 if(cards[i][j].count_ > 0) {
@@ -219,6 +219,19 @@ public class RummiKubSolve {
             addCard(currColor, number);
             group.cards_.remove(card);
         }
+        if(jokerCnt > 0){
+            for(int i=0; i<4; i++){
+                int currColor = i;
+                if(searchColor(group, currColor)) continue;
+                int number = group.cards_.get(0).number_;
+                subCard(0, 0);
+                Card card = new Card(number, currColor, true);
+                group.cards_.add(card);
+                getSameNumGroups(group, retGroup);
+                addCard(0, 0);
+                group.cards_.remove(card);
+            }
+        }
     }
     void getDiffNumGroups(CardGroup group, ArrayList<CardGroup> retGroup){
         if(group.cards_.size() >= 3){
@@ -228,6 +241,7 @@ public class RummiKubSolve {
         int nextNumber = group.cards_.get(group.cards_.size() - 1).number_ + 1;
         if(nextNumber >= 14)
             return;
+
         int color = group.cards_.get(0).color_;
         if(cards[color][nextNumber].count_ > 0){
             subCard(color, nextNumber);
@@ -237,10 +251,18 @@ public class RummiKubSolve {
             addCard(color, nextNumber);
             group.cards_.remove(card);
         }
+        if(jokerCnt > 0){
+            subCard(0, 0);
+            Card card = new Card(nextNumber, color, true);
+            group.cards_.add(card);
+            getDiffNumGroups(group, retGroup);
+            addCard(0, 0);
+            group.cards_.remove(card);
+        }
     }
     //같은숫자로 만들어진 그룹, 다른숫자로 만들어진 그룹들을 반환해야함
-    ArrayList<CardGroup> getIncludeCardGroups(int color, int number, CardGroup group){
-        Card card = new Card(number, color, false);
+    ArrayList<CardGroup> getIncludeCardGroups(int color, int number, boolean joker, CardGroup group){
+        Card card = new Card(number, color, joker);
         group.cards_.add(card);
         ArrayList<CardGroup> retGroups = new ArrayList<CardGroup>();
         getSameNumGroups(group, retGroups);
@@ -248,20 +270,41 @@ public class RummiKubSolve {
         return retGroups;
     }
 
-    void subGroup(CardGroup group){
-        for(int i=0; i<group.cards_.size(); i++){
-            int color = group.cards_.get(i).color_;
-            int number = group.cards_.get(i).number_;
-            subCard(color, number);
+    ArrayList<CardGroup> process(int color, int number, ArrayList<CardGroup> groups){
+        subCard(color, number);
+        CardGroup group = new CardGroup();
+        ArrayList<CardGroup> nextGroups = getIncludeCardGroups(color, number, false, group);
+        addCard(color, number);
+        for(int g = 0; g < nextGroups.size(); g++){
+            CardGroup currGroup = nextGroups.get(g);
+            subGroup(currGroup);
+            groups.add(currGroup);
+            ArrayList<CardGroup> retGroup = getMakeGroups(groups);
+            if(retGroup != null)
+                return retGroup;
+            groups.remove(currGroup);
+            addGroup(currGroup);
         }
+        return null;
     }
-    void addGroup(CardGroup group){
-        for(int i=0; i<group.cards_.size(); i++){
-            int color = group.cards_.get(i).color_;
-            int number = group.cards_.get(i).number_;
-            addCard(color, number);
+    ArrayList<CardGroup> processJoker(int color, int number, ArrayList<CardGroup> groups){
+        subCard(0, 0);
+        CardGroup group = new CardGroup();
+        ArrayList<CardGroup> nextGroups = getIncludeCardGroups(color, number, true, group);
+        addCard(0, 0);
+        for(int g = 0; g < nextGroups.size(); g++){
+            CardGroup currGroup = nextGroups.get(g);
+            subGroup(currGroup);
+            groups.add(currGroup);
+            ArrayList<CardGroup> retGroup = getMakeGroups(groups);
+            if(retGroup != null)
+                return retGroup;
+            groups.remove(currGroup);
+            addGroup(currGroup);
         }
+        return null;
     }
+
 
     ArrayList<CardGroup> getMakeGroups(ArrayList<CardGroup> groups){
         if(allCardCnt == 0){
@@ -273,21 +316,23 @@ public class RummiKubSolve {
         for(int i=0; i<4; i++){
             for(int j=0; j<14; j++){
                 if(cards[i][j].count_ > 0){
-                    int nextColor = i;
-                    int nextNumber = j;
-                    subCard(nextColor, nextNumber);
-                    CardGroup group = new CardGroup();
-                    ArrayList<CardGroup> nextGroups = getIncludeCardGroups(nextColor, nextNumber, group);
-                    addCard(nextColor, nextNumber);
-                    for(int g = 0; g < nextGroups.size(); g++){
-                        CardGroup currGroup = nextGroups.get(g);
-                        subGroup(currGroup);
-                        groups.add(currGroup);
-                        ArrayList<CardGroup> retGroup = getMakeGroups(groups);
-                        if(retGroup != null)
-                            return retGroup;
-                        groups.remove(currGroup);
-                        addGroup(currGroup);
+                    if(j == 0){
+                        for(int k=0; k<4; k++){
+                            for(int h=1; h<14; h++){
+                                int nextColor = k;
+                                int nextNumber = h;
+                                ArrayList<CardGroup> ret = processJoker(nextColor, nextNumber, groups);
+                                if(ret != null)
+                                    return ret;
+                            }
+                        }
+                    }
+                    else{
+                        int nextColor = i;
+                        int nextNumber = j;
+                        ArrayList<CardGroup> ret = process(nextColor, nextNumber, groups);
+                        if(ret != null)
+                            return ret;
                     }
                 }
             }
@@ -299,6 +344,22 @@ public class RummiKubSolve {
         ArrayList<CardGroup> groups = new ArrayList<CardGroup>();
         groups = getMakeGroups(groups);
         return groups;
+    }
+
+
+    RummiKubSolve clone_(){
+        RummiKubSolve ret = new RummiKubSolve();
+        for(int i=0; i<4; i++)
+            for(int j=0; j<14; j++)
+                ret.cards[i][j] = cards[i][j].clone_();
+
+        for(int i=0; i<4; i++)
+            ret.colorCnt[i] = colorCnt[i];
+        for(int i=0; i<14; i++)
+            ret.numberCnt[i] = numberCnt[i];
+        ret.jokerCnt = jokerCnt;
+        ret.allCardCnt = allCardCnt;
+        return ret;
     }
     void init(){
         for (int i = 0; i < cards.length; i++) {
@@ -313,6 +374,30 @@ public class RummiKubSolve {
             numberCnt[i] = 0;
         jokerCnt = 0;
         allCardCnt = 0;
+    }
+    void subGroup(CardGroup group){
+        for(int i=0; i<group.cards_.size(); i++){
+            boolean joker = group.cards_.get(i).joker_;
+            if(joker) {
+                subCard(0, 0);
+                continue;
+            }
+            int color = group.cards_.get(i).color_;
+            int number = group.cards_.get(i).number_;
+            subCard(color, number);
+        }
+    }
+    void addGroup(CardGroup group){
+        for(int i=0; i<group.cards_.size(); i++){
+            boolean joker = group.cards_.get(i).joker_;
+            if(joker) {
+                addCard(0, 0);
+                continue;
+            }
+            int color = group.cards_.get(i).color_;
+            int number = group.cards_.get(i).number_;
+            addCard(color, number);
+        }
     }
     void addCard(int color, int number){
         if(number == 0){
@@ -348,21 +433,6 @@ public class RummiKubSolve {
             cards[0][0].joker_ = false;
         jokerCnt--;
         allCardCnt--;
-    }
-
-    RummiKubSolve clone_(){
-        RummiKubSolve ret = new RummiKubSolve();
-        for(int i=0; i<4; i++)
-            for(int j=0; j<14; j++)
-                ret.cards[i][j] = cards[i][j].clone_();
-
-        for(int i=0; i<4; i++)
-            ret.colorCnt[i] = colorCnt[i];
-        for(int i=0; i<14; i++)
-            ret.numberCnt[i] = numberCnt[i];
-        ret.jokerCnt = jokerCnt;
-        ret.allCardCnt = allCardCnt;
-        return ret;
     }
     void printResult(final ArrayList<CardGroup> groups){
         System.out.println(groups.size());
