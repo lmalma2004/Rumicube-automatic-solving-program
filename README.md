@@ -6,9 +6,9 @@
 	- minSdkVersion: 26
 	- targetSdkVersion: 29 이상
 
-#### 사용언어
+#### 사용기술
 
-- Java
+- Java / Lottie
 
 #### 기능1 : 카드추가, 초기화
 
