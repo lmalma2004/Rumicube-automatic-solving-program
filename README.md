@@ -1,4 +1,5 @@
 ### Rumikube 자동풀이 앱
+### PlayStore : https://play.google.com/store/apps/details?id=com.rummysolver.engine
 
 #### Android
 
