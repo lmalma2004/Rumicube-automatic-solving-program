@@ -15,13 +15,13 @@ import com.airbnb.lottie.LottieAnimationView;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
-    private static final int RED          = 0;
-    private static final int YELLOW       = 1;
-    private static final int BLUE         = 2;
-    private static final int BLACK        = 3;
-    private static final int FIELD_MY     = 0;
+    private static final int RED = 0;
+    private static final int YELLOW = 1;
+    private static final int BLUE = 2;
+    private static final int BLACK = 3;
+    private static final int FIELD_MY = 0;
     private static final int FIELD_COMMON = 1;
     public static int currentColor = BLACK;
 
@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity{
 
     public int currField = FIELD_COMMON;
 
-    class solveThread implements Runnable{
-        public void run(){
+    class solveThread implements Runnable {
+        public void run() {
             lineOfResultCards.clear();
             runOnUiThread(new Runnable() {
                 @Override
@@ -83,28 +83,30 @@ public class MainActivity extends AppCompatActivity{
         createEventOfSolveButton();
         createEventOfStateButton();
     }
-    protected void createLayouts(){
-        CommonCard = (TableLayout)findViewById(R.id.CommonCardLayout);
-        MyCard     = (TableLayout)findViewById(R.id.MyCardLayout);
-        lineManagerOfMainActivity.myCardLine[0].line = (TableRow)findViewById(R.id.MyCardRow1);
-        lineManagerOfMainActivity.myCardLine[1].line = (TableRow)findViewById(R.id.MyCardRow2);
+
+    protected void createLayouts() {
+        CommonCard = (TableLayout) findViewById(R.id.CommonCardLayout);
+        MyCard = (TableLayout) findViewById(R.id.MyCardLayout);
+        lineManagerOfMainActivity.myCardLine[0].line = (TableRow) findViewById(R.id.MyCardRow1);
+        lineManagerOfMainActivity.myCardLine[1].line = (TableRow) findViewById(R.id.MyCardRow2);
     }
-    protected void createButtons(){
-        cards     =  new ImageButton[14];
-        cards[0]  = (ImageButton)findViewById(R.id.cardJ);
-        cards[1]  = (ImageButton)findViewById(R.id.card1);
-        cards[2]  = (ImageButton)findViewById(R.id.card2);
-        cards[3]  = (ImageButton)findViewById(R.id.card3);
-        cards[4]  = (ImageButton)findViewById(R.id.card4);
-        cards[5]  = (ImageButton)findViewById(R.id.card5);
-        cards[6]  = (ImageButton)findViewById(R.id.card6);
-        cards[7]  = (ImageButton)findViewById(R.id.card7);
-        cards[8]  = (ImageButton)findViewById(R.id.card8);
-        cards[9]  = (ImageButton)findViewById(R.id.card9);
-        cards[10] = (ImageButton)findViewById(R.id.card10);
-        cards[11] = (ImageButton)findViewById(R.id.card11);
-        cards[12] = (ImageButton)findViewById(R.id.card12);
-        cards[13] = (ImageButton)findViewById(R.id.card13);
+
+    protected void createButtons() {
+        cards = new ImageButton[14];
+        cards[0] = (ImageButton) findViewById(R.id.cardJ);
+        cards[1] = (ImageButton) findViewById(R.id.card1);
+        cards[2] = (ImageButton) findViewById(R.id.card2);
+        cards[3] = (ImageButton) findViewById(R.id.card3);
+        cards[4] = (ImageButton) findViewById(R.id.card4);
+        cards[5] = (ImageButton) findViewById(R.id.card5);
+        cards[6] = (ImageButton) findViewById(R.id.card6);
+        cards[7] = (ImageButton) findViewById(R.id.card7);
+        cards[8] = (ImageButton) findViewById(R.id.card8);
+        cards[9] = (ImageButton) findViewById(R.id.card9);
+        cards[10] = (ImageButton) findViewById(R.id.card10);
+        cards[11] = (ImageButton) findViewById(R.id.card11);
+        cards[12] = (ImageButton) findViewById(R.id.card12);
+        cards[13] = (ImageButton) findViewById(R.id.card13);
 
         color = (ImageButton) findViewById(R.id.color);
         field = (ImageButton) findViewById(R.id.field);
@@ -113,10 +115,11 @@ public class MainActivity extends AppCompatActivity{
         solve = (LottieAnimationView) findViewById(R.id.solve);
         state = (LottieAnimationView) findViewById(R.id.state);
     }
-    protected void init(){
+
+    protected void init() {
         rummi = new RummiKubSolve();
 
-        if(currentColor == RED){
+        if (currentColor == RED) {
             cards[1].setImageResource(R.drawable.red1);
             cards[2].setImageResource(R.drawable.red2);
             cards[3].setImageResource(R.drawable.red3);
@@ -130,8 +133,7 @@ public class MainActivity extends AppCompatActivity{
             cards[11].setImageResource(R.drawable.red11);
             cards[12].setImageResource(R.drawable.red12);
             cards[13].setImageResource(R.drawable.red13);
-        }
-        else if(currentColor == YELLOW){
+        } else if (currentColor == YELLOW) {
             cards[1].setImageResource(R.drawable.yellow1);
             cards[2].setImageResource(R.drawable.yellow2);
             cards[3].setImageResource(R.drawable.yellow3);
@@ -145,8 +147,7 @@ public class MainActivity extends AppCompatActivity{
             cards[11].setImageResource(R.drawable.yellow11);
             cards[12].setImageResource(R.drawable.yellow12);
             cards[13].setImageResource(R.drawable.yellow13);
-        }
-        else if(currentColor == BLUE){
+        } else if (currentColor == BLUE) {
             cards[1].setImageResource(R.drawable.blue1);
             cards[2].setImageResource(R.drawable.blue2);
             cards[3].setImageResource(R.drawable.blue3);
@@ -160,8 +161,7 @@ public class MainActivity extends AppCompatActivity{
             cards[11].setImageResource(R.drawable.blue11);
             cards[12].setImageResource(R.drawable.blue12);
             cards[13].setImageResource(R.drawable.blue13);
-        }
-        else if(currentColor == BLACK){
+        } else if (currentColor == BLACK) {
             cards[1].setImageResource(R.drawable.black1);
             cards[2].setImageResource(R.drawable.black2);
             cards[3].setImageResource(R.drawable.black3);
@@ -183,12 +183,13 @@ public class MainActivity extends AppCompatActivity{
 
         LineManagerOfMainActivity newLineManager = new LineManagerOfMainActivity();
         lineManagerOfMainActivity = newLineManager;
-        lineManagerOfMainActivity.myCardLine[0].line = (TableRow)findViewById(R.id.MyCardRow1);
-        lineManagerOfMainActivity.myCardLine[1].line = (TableRow)findViewById(R.id.MyCardRow2);
+        lineManagerOfMainActivity.myCardLine[0].line = (TableRow) findViewById(R.id.MyCardRow1);
+        lineManagerOfMainActivity.myCardLine[1].line = (TableRow) findViewById(R.id.MyCardRow2);
     }
-    protected void changeColor(){
+
+    protected void changeColor() {
         currentColor = (currentColor + 1) % 4;
-        if(currentColor == RED){
+        if (currentColor == RED) {
             cards[1].setImageResource(R.drawable.red1);
             cards[2].setImageResource(R.drawable.red2);
             cards[3].setImageResource(R.drawable.red3);
@@ -202,8 +203,7 @@ public class MainActivity extends AppCompatActivity{
             cards[11].setImageResource(R.drawable.red11);
             cards[12].setImageResource(R.drawable.red12);
             cards[13].setImageResource(R.drawable.red13);
-        }
-        else if(currentColor == YELLOW){
+        } else if (currentColor == YELLOW) {
             cards[1].setImageResource(R.drawable.yellow1);
             cards[2].setImageResource(R.drawable.yellow2);
             cards[3].setImageResource(R.drawable.yellow3);
@@ -217,8 +217,7 @@ public class MainActivity extends AppCompatActivity{
             cards[11].setImageResource(R.drawable.yellow11);
             cards[12].setImageResource(R.drawable.yellow12);
             cards[13].setImageResource(R.drawable.yellow13);
-        }
-        else if(currentColor == BLUE){
+        } else if (currentColor == BLUE) {
             cards[1].setImageResource(R.drawable.blue1);
             cards[2].setImageResource(R.drawable.blue2);
             cards[3].setImageResource(R.drawable.blue3);
@@ -232,8 +231,7 @@ public class MainActivity extends AppCompatActivity{
             cards[11].setImageResource(R.drawable.blue11);
             cards[12].setImageResource(R.drawable.blue12);
             cards[13].setImageResource(R.drawable.blue13);
-        }
-        else if(currentColor == BLACK){
+        } else if (currentColor == BLACK) {
             cards[1].setImageResource(R.drawable.black1);
             cards[2].setImageResource(R.drawable.black2);
             cards[3].setImageResource(R.drawable.black3);
@@ -249,7 +247,8 @@ public class MainActivity extends AppCompatActivity{
             cards[13].setImageResource(R.drawable.black13);
         }
     }
-    protected void createEventOfStateButton(){
+
+    protected void createEventOfStateButton() {
         state.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -259,7 +258,8 @@ public class MainActivity extends AppCompatActivity{
             }
         });
     }
-    protected void createEventOfSolveButton(){
+
+    protected void createEventOfSolveButton() {
         solve.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -269,7 +269,8 @@ public class MainActivity extends AppCompatActivity{
             }
         });
     }
-    protected void createEventOfResetButton(){
+
+    protected void createEventOfResetButton() {
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -282,43 +283,45 @@ public class MainActivity extends AppCompatActivity{
 
                 LineManagerOfMainActivity newLineManager = new LineManagerOfMainActivity();
                 lineManagerOfMainActivity = newLineManager;
-                lineManagerOfMainActivity.myCardLine[0].line = (TableRow)findViewById(R.id.MyCardRow1);
-                lineManagerOfMainActivity.myCardLine[1].line = (TableRow)findViewById(R.id.MyCardRow2);
+                lineManagerOfMainActivity.myCardLine[0].line = (TableRow) findViewById(R.id.MyCardRow1);
+                lineManagerOfMainActivity.myCardLine[1].line = (TableRow) findViewById(R.id.MyCardRow2);
             }
         });
     }
-    protected void createEventOfFieldButton(){
+
+    protected void createEventOfFieldButton() {
         field.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(currField == FIELD_COMMON) {
+                if (currField == FIELD_COMMON) {
                     currField = FIELD_MY;
                     field.setImageResource(R.drawable.personal);
-                }
-                else {
+                } else {
                     currField = FIELD_COMMON;
                     field.setImageResource(R.drawable.common);
                 }
             }
         });
     }
-    protected void createEventOfColorButton(){
+
+    protected void createEventOfColorButton() {
         color.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 changeColor();
-                if(currentColor == BLACK)
+                if (currentColor == BLACK)
                     Toast.makeText(getApplicationContext(), "Current Color : BLACK", Toast.LENGTH_SHORT).show();
-                else if(currentColor == RED)
+                else if (currentColor == RED)
                     Toast.makeText(getApplicationContext(), "Current Color : RED", Toast.LENGTH_SHORT).show();
-                else if(currentColor == YELLOW)
+                else if (currentColor == YELLOW)
                     Toast.makeText(getApplicationContext(), "Current Color : YELLOW", Toast.LENGTH_SHORT).show();
-                else if(currentColor == BLUE)
+                else if (currentColor == BLUE)
                     Toast.makeText(getApplicationContext(), "Current Color : BLUE", Toast.LENGTH_SHORT).show();
             }
         });
     }
-    protected void createEventOfCardButtons(){
+
+    protected void createEventOfCardButtons() {
         cards[0].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -432,12 +435,12 @@ public class MainActivity extends AppCompatActivity{
             }
         });
     }
-    protected void addButtonOfCurrentCardView(final int number){
-        if(currField == FIELD_COMMON){
+
+    protected void addButtonOfCurrentCardView(final int number) {
+        if (currField == FIELD_COMMON) {
             lineManagerOfMainActivity.addCommonLine(currentColor, number, CommonCard, this, rummi);
-        }
-        else if(currField == FIELD_MY){
-            lineManagerOfMainActivity.addMyLine(currentColor, number,this, rummi);
+        } else if (currField == FIELD_MY) {
+            lineManagerOfMainActivity.addMyLine(currentColor, number, this, rummi);
         }
     }
 }

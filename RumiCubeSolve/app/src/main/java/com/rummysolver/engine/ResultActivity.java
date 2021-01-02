@@ -13,8 +13,9 @@ import com.airbnb.lottie.LottieAnimationView;
 import java.util.ArrayList;
 
 public class ResultActivity extends AppCompatActivity {
-    private LinearLayout        allOfResultCardsOfParent;
-    private TableLayout         allOfResultCards;
+
+    private LinearLayout allOfResultCardsOfParent;
+    private TableLayout allOfResultCards;
     private LottieAnimationView animationOfResult;
 
     private ArrayList<RummiKubSolve.CardGroup> result;
@@ -25,7 +26,7 @@ public class ResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
 
-        allOfResultCardsOfParent = (LinearLayout)findViewById(R.id.ResultCardLayoutOfParent);
+        allOfResultCardsOfParent = (LinearLayout) findViewById(R.id.ResultCardLayoutOfParent);
 
         animationOfResult = new LottieAnimationView(this);
         animationOfResult.setLayoutParams(new LinearLayout.LayoutParams(
@@ -68,14 +69,11 @@ public class ResultActivity extends AppCompatActivity {
         Intent intent = getIntent();
         result = intent.getParcelableArrayListExtra("Result");
 
-        if(result != null){
-            for(int i=0; i<result.size(); i++)
+        if (result != null) {
+            for (int i = 0; i < result.size(); i++)
                 lineManagerOfResultActivity.addResultLine(result.get(i), allOfResultCards, this);
-        }
-        else{
+        } else {
             lineManagerOfResultActivity.addFailLine(allOfResultCards, this);
         }
-
     }
-
 }
