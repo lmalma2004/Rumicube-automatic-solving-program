@@ -2,6 +2,7 @@ package com.rummysolver.engine;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -421,6 +422,17 @@ public class RummiKubSolve {
     ArrayList<CardGroup> solve() {
         ArrayList<CardGroup> groups = new ArrayList<CardGroup>();
         groups = getMakeGroups(groups);
+
+        if (groups != null) {
+            for (int i = 0; i<groups.size(); i++) {
+                for (int j=0; j<groups.get(i).cards_.size(); j++) {
+                    Log.d("result group number" + i + j, String.valueOf(groups.get(i).cards_.get(j).number_));
+                    Log.d("result group color " + i + j, String.valueOf(groups.get(i).cards_.get(j).color_));
+                    Log.d("result group joker " + i + j, String.valueOf(groups.get(i).cards_.get(j).joker_));
+                }
+            }
+        }
+
         return groups;
     }
 
